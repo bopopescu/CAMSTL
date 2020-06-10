@@ -5,5 +5,5 @@ bn=`expr $bn + 1`
 
 echo $bn > build.num
 git commit build.num -m "CAMS build ::Updating Build Number to $bn"
-git push origin CAMS
+git push origin master
 
