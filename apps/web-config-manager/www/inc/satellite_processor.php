@@ -8,7 +8,7 @@ $dbconfig = new dbconfigController();
 
 
 //Check form submission
-if(!empty($_REQUEST) && !empty($_REQUEST['csrfToken']) && $_REQUEST['csrfToken'] == $_SESSION['csrfToken'] && isset($_SESSION['M2M_SESH_USERAL']) && $_SESSION['M2M_SESH_USERAL'] == 200)
+if(!empty($_REQUEST))
 {
 	debug('=========_REQUEST=============', $_REQUEST);	//DEBUG
 

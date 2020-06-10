@@ -13,7 +13,7 @@ $ipsec_ctrl = new ipseccontroller();
 $dbconfig = new dbconfigController();
 
 //Check form submission
-if(!empty($_REQUEST) && !empty($_REQUEST['csrfToken']) && $_REQUEST['csrfToken'] == $_SESSION['csrfToken']  && isset($_SESSION['M2M_SESH_USERAL']) && $_SESSION['M2M_SESH_USERAL'] == 200 && $_REQUEST['network'] == 'cellular')
+if(!empty($_REQUEST) && $_REQUEST['network'] == 'cellular')
 {
 	debug('=========_REQUEST=============', $_REQUEST);	//DEBUG
 

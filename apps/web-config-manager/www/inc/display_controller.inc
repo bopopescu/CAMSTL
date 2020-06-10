@@ -39,7 +39,12 @@ else if(isAdmin())
 	$access = array("ethernet","wifi-ap");	//form id to disable
 	echo setAdminAccess($access);													//call function that will return jquery code to disable above forms
 }
-
+else if(isSuperAdmin())
+{
+	$access = array("ethernet","wifi-ap");	//form id to disable
+	echo setSuperAdminAccess($access);													//call function that will return jquery code to disable above forms
+}
+debug('(display_controller.inc) $device info 1'); 		//DEBUG
 
 /**
  * setUserAccess
@@ -137,8 +142,7 @@ function getFirmwareVer()
 	if($readfile)
 	{
 		$ver['date'] = $readfile[1];
-		$firmwareVersion = explode(".", $readfile[2]);
-		$ver['num'] = $firmwareVersion[0] . '.' . (int)($firmwareVersion[3]/10000) . '.' . $firmwareVersion[2] . '.' . (int)($firmwareVersion[3] % 10000);
+		$ver['num'] = $readfile[2];
 	}
 	
 	return $ver;

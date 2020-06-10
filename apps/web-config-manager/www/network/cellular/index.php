@@ -41,7 +41,6 @@
 					<div class="hr"><hr /></div>
 
 					<form class="formCheck" id="cellular" method="post" action="/inc/cell_processor.php">
-						<input type="hidden" name="csrfToken" value="<?php echo (!empty($_SESSION['csrfToken']) ? $_SESSION['csrfToken'] : 'noData'); ?>" />
 						<input type="hidden" name="network" value="cellular" />
 						<div class="row">
 							<span class="label">Cellular IMEI</span>
@@ -125,7 +124,6 @@
 						if(hasSubmitAccess())
 						{
 						?>
-						<div class="hr"><hr /></div>
 						<div class="row">
 							<span class="formw">
 								<button type="submit" class="button2-link">Save</button>&nbsp;

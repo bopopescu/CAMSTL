@@ -5,7 +5,7 @@
 	<head>
 		<meta charset="UTF-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-		<title>WiFi - <?php echo DEVICE_NAME; ?></title>
+		<title>Wi-Fi - <?php echo DEVICE_NAME; ?></title>
 
 		<?php include $_SERVER['DOCUMENT_ROOT'].'mainscriptsgroup.php'; ?>
 		<script type="text/javascript" src="/js/wifi.js"></script>
@@ -34,7 +34,7 @@
 					<?php require_once $_SERVER['DOCUMENT_ROOT'].'inc/wifi_view.inc'; ?>
 
 					<!-- Header -->
-					<div class="inversetab">WiFi</div>
+					<div class="inversetab">WiFI</div>
 					<!---  <a href="/TL3000_HTML5/Default_CSH.htm#WIFI" TARGET="_blank"><img src="/images/help.png" alt="help" border="0" ></a> -->
 					<div class="hr"><hr /></div>
 					
@@ -42,15 +42,20 @@
 						<!-- Wifi subsubtabs -->
 						<ul>
 							<li><a href="#wifi-accesspoint">Access Point</a></li>
+							<li><a href="#wifi-client">Client</a></li>
 						</ul>
 						<div id="wifi-accesspoint">
 							<!-- Access Point subsubtab -->
 							<form id="wifi-ap" method="post" action="/inc/wifi_processor.php">
-								<input type="hidden" name="csrfToken" value="<?php echo (!empty($_SESSION['csrfToken']) ? $_SESSION['csrfToken'] : 'noData'); ?>" />
 								<input type="hidden" name="network" value="wifi" />
 								<input type="hidden" name="interface" value="ra0" />
 								<input type="hidden" name="interface_other" value="eth0" />
-								<?php // Powersoft19 remove wifi-ap-enable fields to resolved ISCP-244 JIRA ?>
+								<div class="row">
+									<span class="label2">Access Point Mode</span> <span class="formw2">
+										<input type="radio" name="wifi-ap-enable" value="1" <?php echo !isOff($wifi_ap_enable_status) ? 'checked="checked"' : '';?> />On&nbsp;&nbsp;
+										<input type="radio" name="wifi-ap-enable" value="0" <?php echo isOff($wifi_ap_enable_status) ? 'checked="checked"' : '';?> /> Off
+									</span>
+								</div>
 								<div class="row">
 									<span class="label2">SSID</span>
 									<span class="formw2 reg">
@@ -81,6 +86,32 @@
 											<option <?php echo (((strcasecmp($wencrypt,'TKIP') == 0) || empty($wencrypt)) ? 'selected="selected"':'');?> value="TKIP">TKIP</option>
 											<option <?php echo ((strcasecmp($wencrypt,'TKIPAES') == 0) ? 'selected="selected"':'');?> value="TKIPAES">TKIPAES</option>
 										</select>
+									</span>
+								</div>
+								<div class="row">
+									<span class="label2">Password</span><span class="formw2 pwd" id="pwdID">
+									<input type="password" size="26" name="wifipassword" value="" /> <span><input type="checkbox" name="showPwd" value="ShowPwd"/>Show Password</span><br/>
+									<span name="wifipwdMessage" class="fieldMessage">*Password will remain unchanged unless a new password is entered or the SSID is changed</span>
+										<br/>
+								<span class="errorMsg" name="errorPassword"></span>
+									</span>
+								</div>
+									<div class="row">
+									<span class="label2">Re-Enter Password</span><span class="formw2 rpwd" id="rpwdID">
+									<input type="password" size="26" name="rwifipassword" value="" />
+										<br/>
+								<span class="errorMsg" name="rerrorPassword"></span>
+									</span>
+								</div>
+								<div class="row">
+									<span class="label2">MAC Address</span>
+									<span class="formw2">
+										<input type="text" size="1" value="<?php echo $wmac[0]; ?>" readonly="readonly"/>:
+										<input type="text" size="1" value="<?php echo $wmac[1]; ?>" readonly="readonly"/>:
+										<input type="text" size="1" value="<?php echo $wmac[2]; ?>" readonly="readonly"/>:
+										<input type="text" size="1" value="<?php echo $wmac[3]; ?>" readonly="readonly"/>:
+										<input type="text" size="1" value="<?php echo $wmac[4]; ?>" readonly="readonly"/>:
+										<input type="text" size="1" value="<?php echo $wmac[5]; ?>" readonly="readonly"/>
 									</span>
 								</div>
 								<div class="row">
@@ -175,7 +206,6 @@
 								if(hasSubmitAccess())
 								{
 								?>
-								<div class="hr"><hr /></div>
 								<div class="row">
 									<span class="formw2">
 										<button class="button2-link" type="submit">Save</button>&nbsp;
@@ -187,6 +217,12 @@
 								}
 								?>
 							</form>
+						</div>
+						<div id="clientdiv">
+							<div id="wifi-client">
+								<!-- Client subsubtab -->
+								<?php include('wifi.php');?>
+							</div>
 						</div>
 					</div>
 				</div>

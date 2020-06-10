@@ -99,9 +99,7 @@ else
 	$edhcp_status_raw = $dbconfig->getDbconfigData('system', 'eth0dhcp');
 
 	if (empty($edhcp_status_raw) || $edhcp_status_raw == "auto")
-		$edhcp_status = "auto";		
-	elseif ($edhcp_status_raw == "client")
-		$edhcp_status = "on";
+	  $edhcp_status = "auto";
 	else
 		$edhcp_status = ((!empty($edhcp_status_raw) && $edhcp_status_raw == "On") ? "on" : "off");
 }

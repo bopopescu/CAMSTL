@@ -1,25 +1,25 @@
 <?php
 require_once $_SERVER['DOCUMENT_ROOT'].'inc/session_validator.inc';
 require_once $_SERVER['DOCUMENT_ROOT'].'inc/dbconfig_controller.inc';
-//require_once $_SERVER['DOCUMENT_ROOT'].'/inc/network_controller.inc'; //network (ethernet, wireless) controller
+require_once $_SERVER['DOCUMENT_ROOT'].'/inc/network_controller.inc'; //network (ethernet, wireless) controller
 require_once $_SERVER['DOCUMENT_ROOT'].'/inc/wifi_controller.inc';	//wifi (AP + client) controller
-//require_once $_SERVER['DOCUMENT_ROOT'].'/inc/dhcp_controller.inc';	//dhcp controller
+require_once $_SERVER['DOCUMENT_ROOT'].'/inc/dhcp_controller.inc';	//dhcp controller
 require_once $_SERVER['DOCUMENT_ROOT'].'/inc/util.inc';				//contains functions for socket interaction, error message display, and logging.
 require_once $_SERVER['DOCUMENT_ROOT'].'/inc/db_sqlite3.inc';		//contains functions for db interaction
 
 //OBJECT INSTANTIATION
-//$nt_ctrl = new networkcontroller();
+$nt_ctrl = new networkcontroller();
 $wifi_ctrl = new wificontroller();
-//$dhcp_ctrl = new dhcpcontroller();
+$dhcp_ctrl = new dhcpcontroller();
 $dbconfig = new dbconfigController();
 
 //Check form submission
-if(!empty($_REQUEST) && !empty($_REQUEST['csrfToken']) && $_REQUEST['csrfToken'] == $_SESSION['csrfToken'] && isset($_SESSION['M2M_SESH_USERAL']) && $_SESSION['M2M_SESH_USERAL'] == 200)
+if(!empty($_REQUEST))
 {
 	debug('=========_REQUEST=============', $_REQUEST);	//DEBUG
 
 	//WiFi form submission
-	$result = submitWifi($wifi_ctrl, $dbconfig, trimRequest($_REQUEST));
+	$result = submitWifi($nt_ctrl, $wifi_ctrl, $dhcp_ctrl, $dbconfig, trimRequest($_REQUEST));
 	header("location:http://".$_SERVER['HTTP_HOST']."/network/wifi/index.php?success=".$result['success']."&module=".$result['module']."&codes=".implode(",",$result['codes'])."&fields=".$result['fields'].$result['getParams']);
 }
 else
@@ -33,12 +33,13 @@ else
  *
  * Submits the wifi form content to the wifi controller for processing.
  * If Wifi settings are successfully saved, then proceeds to save DHCP settings.
+ * @param object $nt_ctrl network controller object
  * @param object $wifi_ctrl wifi controller object
- * @param object $dbconfig db controller object
+ * @param object $dhcp_ctrl dhcp controller object
  * @param array - the _REQUEST variable that contains the form submission data
  * @author Sean Toscano (sean@absolutetrac.com)
  */
-function submitWifi($wifi_ctrl, $dbconfig, $request)
+function submitWifi($nt_ctrl, $wifi_ctrl, $dhcp_ctrl, $dbconfig, $request)
 {
 	$result = array("success" => "false", "module" => "wifi", "codes" => array(), "fields" => null, "getParams" => null);	//array for capturing result status, status code, and field names.
 
@@ -52,203 +53,202 @@ function submitWifi($wifi_ctrl, $dbconfig, $request)
 	$wifi_ap_result = false;
 	$result_ap_fail_codes = array();
 	$error_fields_highlighted = false;
-	$wifi_reset = array(); //array for capturing each settings to restore on failure
 
-	// Get current Wifi Enable setting
-	$wifi_reset['WiFi'] = ['WiFi', 'ap-enabled', $dbconfig->getDbconfigData('WiFi', 'ap-enabled')];
-
-	if ($wifi_reset['WiFi'][2] != 1) {
-    // Set WiFi to enable 
-		$dbconfig->setDbconfigData('WiFi', 'ap-enabled', 1);
+	// if the wifi enable is not set we default to true
+	if(isValidOnOff(isset($request['wifi-ap-enable']) ? $request['wifi-ap-enable'] : true))
+	{
+		$dbconfig->setDbconfigData('WiFi', 'ap-enabled', isOn($request['wifi-ap-enable']) ? 1 : 0);
 	}
 
-	// Get current Wifi SSH Enable value
-	$wifi_reset['EnableSSH'] = ['WiFi', 'EnableSSH', $dbconfig->getDbconfigData('WiFi', 'EnableSSH')];
-	if ($wifi_reset['EnableSSH'][2] != $request['wifi-ssh-enable']) {
-		if(isValidOnOff(isset($request['wifi-ssh-enable']) ? $request['wifi-ssh-enable'] : true)) {
-			// Set Wifi SSH Enable value
+    if ($request['wifi-ap-enable'])
+	{
+		if(isValidOnOff(isset($request['wifi-ssh-enable']) ? $request['wifi-ssh-enable'] : true))
+		{
 			$dbconfig->setDbconfigData('WiFi', 'EnableSSH', isOn($request['wifi-ssh-enable']) ? 1 : 0);
 		}
-	}
-	// Save network settings
 
-	// Parse IP
-	$ip = '';		//IP
-	if ((isset($request['wipoct1']) && $request['wipoct1'] != '') &&
-		(isset($request['wipoct2']) && $request['wipoct2'] != '') &&
-		(isset($request['wipoct3']) && $request['wipoct3'] != '') &&
-		(isset($request['wipoct4']) && $request['wipoct4'] != ''))
-	{
-		$ip = $request['wipoct1'].'.'.$request['wipoct2'].'.'.$request['wipoct3'].'.'.$request['wipoct4'];
-	}
-	// Get current IP
-	$wifi_reset['IP'] = ['system', 'ra0addr', $dbconfig->getDbconfigData('system', 'ra0addr')];
+		// Save network settings
 
-	if ($wifi_reset['IP'][2] != $ip && isValidIP($ip)) {
+		// Parse IP
+		$ip = '';		//IP
+		if( (isset($request['wipoct1']) && $request['wipoct1'] != '') &&
+			(isset($request['wipoct2']) && $request['wipoct2'] != '') &&
+			(isset($request['wipoct3']) && $request['wipoct3'] != '') &&
+			(isset($request['wipoct4']) && $request['wipoct4'] != ''))
+		{
+			$ip = $request['wipoct1'].'.'.$request['wipoct2'].'.'.$request['wipoct3'].'.'.$request['wipoct4'];
+		}
+
 		// Save IP
-		$wifi_net_result = $wifi_result['wipoct1'] = (isValidIP($ip) ? $dbconfig->setDbconfigData('system', 'ra0addr', $ip) : false);
-		debug('(wifi_processor.php|submitWifi()) WiFi network settings|Ip Address saved');	//DEBUG
-	}
-	// Parse Subnet Mask
-	$mask = '';	//Subnet Mask
-	if ((isset($request['wsoct1']) && $request['wsoct1'] != '') &&
-		(isset($request['wsoct2']) && $request['wsoct2'] != '') &&
-		(isset($request['wsoct3']) && $request['wsoct3'] != '') &&
-		(isset($request['wsoct4']) && $request['wsoct4'] != ''))
-	{
-		$mask = $request['wsoct1'].'.'.$request['wsoct2'].'.'.$request['wsoct3'].'.'.$request['wsoct4'];
-	}
-	// Get current Subnet Mask
-	$wifi_reset['Mask'] = ['system', 'ra0mask', $dbconfig->getDbconfigData('system', 'ra0mask')];
+		$wifi_result['wipoct1'] = (isValidIP($ip) ? $dbconfig->setDbconfigData('system', 'ra0addr', $ip) : false);
 
-	if ($wifi_reset['Mask'][2] != $mask && isValidIP($mask)) {
+		// Parse Subnet Mask
+		$mask = '';	//Subnet Mask
+		if( (isset($request['wsoct1']) && $request['wsoct1'] != '') &&
+			(isset($request['wsoct2']) && $request['wsoct2'] != '') &&
+			(isset($request['wsoct3']) && $request['wsoct3'] != '') &&
+			(isset($request['wsoct4']) && $request['wsoct4'] != ''))
+		{
+			$mask = $request['wsoct1'].'.'.$request['wsoct2'].'.'.$request['wsoct3'].'.'.$request['wsoct4'];
+		}
+
 		// Save Subnet Mask
-		$wifi_net_result = $wifi_result['wsoct1'] = (isValidIP($mask) ? $dbconfig->setDbconfigData('system', 'ra0mask', $mask) : false);
-		debug('(wifi_processor.php|submitWifi()) WiFi network settings|Subnet Mask saved');	//DEBUG
-	}
+		$wifi_result['wsoct1'] = (isValidIP($mask) ? $dbconfig->setDbconfigData('system', 'ra0mask', $mask) : false);
 
-	// Proceed to save dhcp settings
-	if (isset($request['dhcpserver']))
-	{
-		$wifi_result['dhcpserver'] = $wifi_result['sdhcpoct1'] = $wifi_result['edhcpoct1'] = true;
+		// Parse MAC Address
+		$mac = '';		//MAC
+		$wifi_result['wmac1'] = true;
 
-		// Get current DHCP settings
-		$wifi_reset['DHCP'] = ['system', 'ra0dhcp', $dbconfig->getDbconfigData('system', 'ra0dhcp')];
-
-		// Set DHCP State On | Off
-		if (isOn($request['dhcpserver']))			//DHCP Server Enabled
+		if($wifi_result['wipoct1'] === true && $wifi_result['wsoct1'] === true)		//wifi settings successfully saved
 		{
-			// $wifi_result['dhcpserver'] = $dbconfig->unsetDbconfigData('system', 'ra0dhcp');
-			$wifi_result['dhcpserver']  = $dbconfig->setDbconfigData('system', 'ra0dhcp', 'on');
+			debug('(wifi_processor.php|submitWifi()) WiFi network settings saved');	//DEBUG
 
-			// SET DHCP START IP RANGE
-			$dhcp_sip = '';
-			if ((isset($request['sdhcpoct1']) && $request['sdhcpoct1'] != '') &&
-				(isset($request['sdhcpoct2']) && $request['sdhcpoct2'] != '') &&
-				(isset($request['sdhcpoct3']) && $request['sdhcpoct3'] != '') &&
-				(isset($request['sdhcpoct4']) && $request['sdhcpoct4'] != ''))
+			// Proceed to save dhcp settings
+			if(!empty($request['dhcpserver']))
 			{
-				$dhcp_sip = $request['sdhcpoct1'].'.'.$request['sdhcpoct2'].'.'.$request['sdhcpoct3'].'.'.$request['sdhcpoct4'];
-			}
+				$wifi_result['dhcpserver'] = $wifi_result['sdhcpoct1'] = $wifi_result['edhcpoct1'] = true;
 
-			// Get current DHCP Start IP
-			$wifi_reset['DHCPstartIP'] = ['system', 'ra0startip', $dbconfig->getDbconfigData('system', 'ra0startip')];
+				// Set DHCP State On | Off
+				if(isOn($request['dhcpserver']))			//DHCP Server Enabled
+				{
+					$wifi_result['dhcpserver'] = $dbconfig->unsetDbconfigData('system', 'ra0dhcp');
+				}
+				else if(isOff($request['dhcpserver']))		//DHCP Server Disabled
+				{
+					$wifi_result['dhcpserver']  = $dbconfig->setDbconfigData('system', 'ra0dhcp', 1);
+				}
+				else
+				{
+					$wifi_result['dhcpserver'] = false;
+				}
 
-			if ($wifi_reset['DHCPstartIP'][2] != $dhcp_sip && isValidIP($dhcp_sip)) {
-				$wifi_net_result = $wifi_result['sdhcpoct1'] = (isValidIP($dhcp_sip) ? $dbconfig->setDbconfigData('system', 'ra0startip', $dhcp_sip) : false);
-			}
+				if(isOn($request['dhcpserver']) /*&& $ethernet_result['dhcpserver'] === true*/)
+				{
+					// SET DHCP START IP RANGE
+					$dhcp_sip = '';
+					if( (isset($request['sdhcpoct1']) && $request['sdhcpoct1'] != '') &&
+						(isset($request['sdhcpoct2']) && $request['sdhcpoct2'] != '') &&
+						(isset($request['sdhcpoct3']) && $request['sdhcpoct3'] != '') &&
+						(isset($request['sdhcpoct4']) && $request['sdhcpoct4'] != ''))
+					{
+						$dhcp_sip = $request['sdhcpoct1'].'.'.$request['sdhcpoct2'].'.'.$request['sdhcpoct3'].'.'.$request['sdhcpoct4'];
+					}
 
-			// SET DHCP END IP RANGE
-			$dhcp_eip = '';
-			if ((isset($request['edhcpoct1']) && $request['edhcpoct1'] != '') &&
-				(isset($request['edhcpoct2']) && $request['edhcpoct2'] != '') &&
-				(isset($request['edhcpoct3']) && $request['edhcpoct3'] != '') &&
-				(isset($request['edhcpoct4']) && $request['edhcpoct4'] != ''))
-			{
-				$dhcp_eip = $request['edhcpoct1'].'.'.$request['edhcpoct2'].'.'.$request['edhcpoct3'].'.'.$request['edhcpoct4'];
-			}
-			// Get current DHCP Start IP
-			$wifi_reset['DHCPendIP'] = ['system', 'ra0endip', $dbconfig->getDbconfigData('system', 'ra0endip')];
+					$wifi_result['sdhcpoct1'] = (isValidIP($dhcp_sip) ? $dbconfig->setDbconfigData('system', 'ra0startip', $dhcp_sip) : false);
 
-			if ($wifi_reset['edhcpoct1'][2] != $dhcp_eip && isValidIP($dhcp_eip)) {
-				$wifi_net_result = $wifi_result['edhcpoct1'] = (isValidIP($dhcp_eip) ? $dbconfig->setDbconfigData('system', 'ra0endip', $dhcp_eip) : false);
-			}	
-			
-		}
-		else if (isOff($request['dhcpserver']))		//DHCP Server Disabled
-		{
-			$wifi_result['dhcpserver']  = $dbconfig->setDbconfigData('system', 'ra0dhcp', 'off');
-		}
-		else
-		{
-			$wifi_result['dhcpserver'] = false;
-		}
+					// SET DHCP END IP RANGE
+					$dhcp_eip = '';
+					if( (isset($request['edhcpoct1']) && $request['edhcpoct1'] != '') &&
+						(isset($request['edhcpoct2']) && $request['edhcpoct2'] != '') &&
+						(isset($request['edhcpoct3']) && $request['edhcpoct3'] != '') &&
+						(isset($request['edhcpoct4']) && $request['edhcpoct4'] != ''))
+					{
+						$dhcp_eip = $request['edhcpoct1'].'.'.$request['edhcpoct2'].'.'.$request['edhcpoct3'].'.'.$request['edhcpoct4'];
+					}
 
-		if ($wifi_result['dhcpserver'] === true && $wifi_result['sdhcpoct1'] === true && $wifi_result['edhcpoct1'] === true)
-		{
-			// Unset the dhcpd.conf file in dbconfig
-			if($dbconfig->unsetDbconfigData('system', 'dhcpd.conf'))
-			{
-				$wifi_net_result = true;
-				debug('(wifi_processor.php|submitWifi()) DHCP settings saved');	//DEBUG
-			}
-			else
-			{
-				$wifi_net_result = false;
-				debug('(wifi_processor.php|submitWifi()) Failed to unset dhcpd.conf in db-config');	//DEBUG
+					$wifi_result['edhcpoct1'] = (isValidIP($dhcp_eip) ? $dbconfig->setDbconfigData('system', 'ra0endip', $dhcp_eip) : false);
+				}
+
+				if($wifi_result['dhcpserver'] === true && $wifi_result['sdhcpoct1'] === true && $wifi_result['edhcpoct1'] === true)
+				{
+					// Unset the dhcpd.conf file in dbconfig
+					if($dbconfig->unsetDbconfigData('system', 'dhcpd.conf'))
+					{
+						$wifi_net_result = true;
+						//$result['success'] = 'true';
+						//$result['codes'][] = 10;
+						//$result['codes'][] = 14;
+						debug('(wifi_processor.php|submitWifi()) DHCP settings saved');	//DEBUG
+					}
+					else
+					{
+						$wifi_net_result = false;
+						//$result['success'] = 'false';
+						//$result['codes'][] = 156;
+						debug('(wifi_processor.php|submitWifi()) Failed to unset dhcpd.conf in db-config');	//DEBUG
+					}
+				}
+				else
+				{
+					$wifi_net_result = false;
+				//$result['success'] = 'false';
+				//$result['codes'][] = 221;
+				debug('(wifi_processor.php|submitWifi()) Failed to save DHCP settings');	//DEBUG
+				}
 			}
 		}
 		else
 		{
 			$wifi_net_result = false;
-		//$result['success'] = 'false';
-		//$result['codes'][] = 221;
-		debug('(wifi_processor.php|submitWifi()) Failed to save DHCP settings');	//DEBUG
+			//$result['success'] = 'false';
+			//$result['codes'][] = 201;
+			//$result['codes'] = array_merge($result['codes'], $result_eth['codes']);
+			debug('(wifi_processor.php|submitWifi()) Failed to save Wi-Fi settings');	//DEBUG
 		}
-	}
 
-	// Save the WiFi AP settings
-	if (!empty($request['ssid']) && !empty($request['authtype']) && !empty($request['encryptype']))
-	{
-		
-		// Get current Wifi SSID, Password, Authentication Mode and Encryption Type
-		$wif_ap_info = $wifi_ctrl->getAPinfo();
-		$pass = ($request['encryptype'] == "WEP" ? "0" . getSerialToSetWiFiPass() : 'ISC0' . getSerialToSetWiFiPass());
-		$currentPass = ($wif_ap_info['encryp'] == "WEP" ? "0" . getSerialToSetWiFiPass() : 'ISC0' . getSerialToSetWiFiPass());
-		$wifi_reset['AP'] = ['interface' => $interface['name'], 'essid'=> $wif_ap_info['ssid'], 'authmode'=>$wif_ap_info['auth'], 'encryptype'=>$wif_ap_info['encryp'], 'password'=>$currentPass, 'mac'=>''];
+		// Save the Wi-Fi AP settings
 
-		// Update/Save Wifi ap settings
-		$result_ap = $wifi_ctrl->APupdate(array('interface' => $interface['name'], 'essid'=> $request['ssid'], 'authmode'=>$request['authtype'], 'encryptype'=>$request['encryptype'], 'password'=>$pass, 'mac'=>$interface['mac']));
-
-		if ($result_ap['success'] == 'true')		//wifi ap settings successfully saved
+		if(!empty($request['ssid']) && !empty($request['authtype']) && !empty($request['encryptype']))
 		{
-			$wifi_ap_result = true;
-			debug('(wifi_processor.php|submitWifi()) WiFi AP settings saved');	//DEBUG
-			//$result['success'] = 'true';
-			//$result['codes'][] = 210;
+			$password = ((isset($request['wifipassword']) && $request['wifipassword'] != '') ? $request['wifipassword'] : '');
+
+			$result_ap = $wifi_ctrl->APupdate(array('interface' => $interface['name'], 'essid'=> $request['ssid'], 'authmode'=>$request['authtype'], 'encryptype'=>$request['encryptype'], 'password'=>$password, 'mac'=>$interface['mac']));
+
+			if($result_ap['success'] == 'true')		//wifi ap settings successfully saved
+			{
+				$wifi_ap_result = true;
+				debug('(wifi_processor.php|submitWifi()) Wi-Fi AP settings saved');	//DEBUG
+				//$result['success'] = 'true';
+				//$result['codes'][] = 210;
+			}
+			else
+			{
+				$wifi_ap_result = false;
+
+				$result_ap_fail_codes[] = 211;
+				$result_ap_fail_codes = array_merge($result_ap_fail_codes, $result_ap['codes']);
+
+				debug('(wifi_processor.php|submitWifi()) Failed to save Wi-Fi AP settings');	//DEBUG
+			}
 		}
 		else
 		{
+			if(empty($request['ssid']))
+				$wifi_result['ssid'] = false;
+
+			if(empty($request['authtype']))
+				$wifi_result['authtype'] = false;
+
+			if(empty($request['encryptype']))
+				$wifi_result['encryptype'] = false;
+
 			$wifi_ap_result = false;
-			$result_ap_fail_codes[] = 211;
-			$result_ap_fail_codes = array_merge($result_ap_fail_codes, $result_ap['codes']);
-
-			debug('(wifi_processor.php|submitWifi()) Failed to save WiFi AP settings');	//DEBUG
+			$error_fields_highlighted = true;
 		}
-	}
-	else
-	{
-		if (empty($request['ssid']))
-			$wifi_result['ssid'] = false;
 
-		if (empty($request['authtype']))
-			$wifi_result['authtype'] = false;
-
-		if (empty($request['encryptype']))
-			$wifi_result['encryptype'] = false;
-
-		$wifi_ap_result = false;
-		$error_fields_highlighted = true;
-	}
-
-	if ($wifi_net_result === true && $wifi_ap_result === true)
-	{
-		$result['success'] = 'true';
-		$result['codes'][] = 10;
-		$result['codes'][] = 14;
-	}
-	else
-	{
-		$result['success'] = 'false';
-		$result['codes'] = array_merge($result['codes'], $result_ap_fail_codes);
-
-		if ($wifi_net_result === false || $error_fields_highlighted === true)
+		if($wifi_net_result === true && $wifi_result['wmac1'] === true && $wifi_ap_result === true)
 		{
-			$result['codes'][] = 12;
+			$result['success'] = 'true';
+			$result['codes'][] = 10;
+			$result['codes'][] = 14;
 		}
 		else
 		{
-			$result['codes'][] = 11;
+			$result['success'] = 'false';
+
+			if(isSuperAdmin())
+			{
+				$result['codes'] = array_merge($result['codes'], $result_ap_fail_codes);
+			}
+
+			if($wifi_net_result === false || $wifi_result['wmac1'] === false || $error_fields_highlighted === true)
+			{
+				$result['codes'][] = 12;
+			}
+			else
+			{
+				$result['codes'][] = 11;
+			}
 		}
 	}
 
@@ -259,21 +259,25 @@ function submitWifi($wifi_ctrl, $dbconfig, $request)
 
 	foreach($failed_results as $field)
 	{
-		if ($field == 'wipoct1')			// IP
+		if($field == 'wipoct1')			// IP
 		{
 			$result['getParams'] .= '&ip='.$request['wipoct1'].'.'.$request['wipoct2'].'.'.$request['wipoct3'].'.'.$request['wipoct4'];
 		}
-		else if ($field == 'wsoct1')		// Subnet Mask
+		else if($field == 'wsoct1')		// Subnet Mask
 		{
 			$result['getParams'] .= '&mask='.$request['wsoct1'].'.'.$request['wsoct2'].'.'.$request['wsoct3'].'.'.$request['wsoct4'];
 		}
-		else if ($field == 'sdhcpoct1')	// DHCP Start IP
+		else if($field == 'sdhcpoct1')	// DHCP Start IP
 		{
 			$result['getParams'] .= '&dhcpsip='.$request['sdhcpoct1'].'.'.$request['sdhcpoct2'].'.'.$request['sdhcpoct3'].'.'.$request['sdhcpoct4'];
 		}
-		else if ($field == 'edhcpoct1')	// DHCP End IP
+		else if($field == 'edhcpoct1')	// DHCP End IP
 		{
 			$result['getParams'] .= '&dhcpeip='.$request['edhcpoct1'].'.'.$request['edhcpoct2'].'.'.$request['edhcpoct3'].'.'.$request['edhcpoct4'];
+		}
+		else if($field == 'wmac1')		// MAC
+		{
+			$result['getParams'] .= '&mac='.$request['wmac1'].':'.$request['wmac2'].':'.$request['wmac3'].':'.$request['wmac4'].':'.$request['wmac5'].':'.$request['wmac6'];
 		}
 		else	// Other fields
 		{
@@ -283,33 +287,65 @@ function submitWifi($wifi_ctrl, $dbconfig, $request)
 
 	debug('(wifi_processor.php|submitWifi()) $result: ', $result); 	//DEBUG
 
-	// Reset Wifi Settings
-	if ($result['success'] == 'false') {
-		foreach($wifi_reset as $key=>$value) {
-			if ($key == 'EnableSSH' || 'IP' || 'Mask' || 'DHCP' || 'DHCPstartIP' || 'DHCPendIP') {
-				if ($key == "DHCP" && isOn($value)) {
-					$dbconfig->setDbconfigData('system', 'ra0dhcp', 'on');
-				} else {
-					$dbconfig->setDbconfigData($value[0], $value[1], $value[2]);
-				}
-			} elseif ($key == 'AP') { 
-				$wifi_ctrl->APupdate($value);
-			}
-		}
-	}
-
 	return $result;
 
 } //END submitWifi
 
-function getSerialToSetWiFiPass()
+/** DEPRECATED - January 2014
+/**
+ * submitDhcp
+ * Submits the dhcp form content to the dhcp controller for processing
+ *
+ * @param object $dhcp_ctrl - dhcp controller object
+ * @param array $request -  the _REQUEST variable that contains the form submission data
+ * @param array $interface	- network interface data( Start/End IP, Mask, Gateway)
+ * @return boolean returns true if DHCP settings were successfully saved, false otherwise
+ * @author Sean Toscano (sean@absolutetrac.com)
+ */
+/*function submitDhcp($dhcp_ctrl, $request, $interface)
 {
-	$serialConf = '/mnt/nvram/rom/sn.txt';
-	$serial = '1234';
-	$readfile = file($serialConf,FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-	if($readfile)
-		$serial = $readfile[0];
-	return $serial;
-}
+		$dhcp['name'] = $interface['name']; //eth0/ra0
+
+		if(strcasecmp(trim($request['dhcpserver']),'Enabled') == 0)		//DHCP Server Enabled
+		{
+			//$dhcp['dhcp_status'] = 1;
+			$dhcp['dhcp_status'] = "on";
+		}
+		else if(strcasecmp(trim($request['dhcpserver']),'Disabled') == 0)	//DHCP Server Disabled
+		{
+			//$dhcp['dhcp_status'] = 0;
+			$dhcp['dhcp_status'] = "off";
+		}
+
+
+		if($dhcp['dhcp_status'] == "on")
+		{
+
+			$dhcp['dhcp_sip'] = '';			//DHCP Range Start Ip
+			if( (isset($request['sdhcpoct1']) && $request['sdhcpoct1'] != '') &&
+					(isset($request['sdhcpoct2']) && $request['sdhcpoct2'] != '') &&
+					(isset($request['sdhcpoct3']) && $request['sdhcpoct3'] != '') &&
+					(isset($request['sdhcpoct4']) && $request['sdhcpoct4'] != ''))
+			{
+				$dhcp['dhcp_sip'] = $request['sdhcpoct1'].'.'.$request['sdhcpoct2'].'.'.$request['sdhcpoct3'].'.'.$request['sdhcpoct4'];
+			}
+
+			$dhcp['dhcp_eip'] = '';			//DHCP Range End Ip
+			if( (isset($request['edhcpoct1']) && $request['edhcpoct1'] != '') &&
+					(isset($request['edhcpoct2']) && $request['edhcpoct2'] != '') &&
+					(isset($request['edhcpoct3']) && $request['edhcpoct3'] != '') &&
+					(isset($request['edhcpoct4']) && $request['edhcpoct4'] != ''))
+			{
+				$dhcp['dhcp_eip'] = $request['edhcpoct1'].'.'.$request['edhcpoct2'].'.'.$request['edhcpoct3'].'.'.$request['edhcpoct4'];
+			}
+
+			$dhcp['dhcp_gateway'] = $interface['ip'];		//DHCP Gateway
+		}
+
+		debug('(wifi_processor.php|submitDhcp()) dhcp array', $dhcp);	//DEBUG
+		return $dhcp_ctrl->setDhcp($dhcp);
+
+} //END submitDhcp
+*/
 
 ?>

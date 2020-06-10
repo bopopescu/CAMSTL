@@ -113,7 +113,7 @@ if(isset($_GET['dhcpserver']) && $_GET['dhcpserver'] !== false)
 else
 {
 	$wdhcp_status_raw = $dbconfig->getDbconfigData('system', 'ra0dhcp');
-	$wdhcp_status = $wdhcp_status_raw;//((isset($wdhcp_status_raw) && ($wdhcp_status_raw === "on" || $wdhcp_status_raw === 1)) ? "off" : "on");
+	$wdhcp_status = ((isset($wdhcp_status_raw) && ($wdhcp_status_raw === "1" || $wdhcp_status_raw === 1)) ? "off" : "on");
 }
 
 // DHCP START IP

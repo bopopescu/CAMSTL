@@ -2,7 +2,7 @@ $(document).ready(function()
 {
 	$("form#cellular input, form#cellular select").on("change keyup", validateCellular);
 	validateCellular();
-	// updateRSSI();
+	updateRSSI();
 });
 
 function validateCellular()
@@ -25,7 +25,7 @@ function updateRSSI()
 			  dataType: "text",
 			  async: true,
 			  cache: false,
-			  url: 'https://'+window.location.hostname+'/inc/cell_view.inc',
+			  url: 'http://'+window.location.hostname+'/inc/cell_view.inc',
 			  data: { op: 'RSSIupdate' },
 				  
 			  beforeSend:function(){},

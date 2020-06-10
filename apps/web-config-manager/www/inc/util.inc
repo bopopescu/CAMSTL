@@ -6,7 +6,7 @@ require_once $_SERVER['DOCUMENT_ROOT'].'inc/config.inc';
 require_once $_SERVER['DOCUMENT_ROOT'].'inc/db_sqlite3.inc';		//contains functions for db interaction
 require_once $_SERVER['DOCUMENT_ROOT'].'inc/klogger.inc'; 		//logging utility
 
-$log = new KLogger('/tmp/webconfig/', KLogger::ERR);		//instantiating logging utility
+$log = new KLogger('/tmp/webconfig/', KLogger::LCM);		//instantiating logging utility
 
 $db = new db_sqlite3();
 //$db_conn = $db->connect_sqlite($_SERVER['DOCUMENT_ROOT'].'/../www-app/config_mang.db');
@@ -353,6 +353,23 @@ function isSuperAdmin()
 }
 
 /*
+ * isInstaller
+* Checks if the account that's logged in has 'installer' access
+*/
+function isInstaller()
+{
+	//debug('[isInstaller] $_SESSION[\'M2M_SESH_USERAL\'] = ' .$_SESSION['M2M_SESH_USERAL']);
+	if(!empty($_SESSION['M2M_SESH_USERAL']) && $_SESSION['M2M_SESH_USERAL'] == 100)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+/*
  * isAdmin
 * Checks if the account that's logged in has 'admin' access
 */
@@ -375,6 +392,7 @@ function isAdmin()
 */
 function isUser()
 {
+	//debug('[isUser] $_SESSION[\'M2M_SESH_USERAL\'] = ' .$_SESSION['M2M_SESH_USERAL']);
 	if(!empty($_SESSION['M2M_SESH_USERAL']) && $_SESSION['M2M_SESH_USERAL'] == 300)
 	{
 		return true;
@@ -385,6 +403,23 @@ function isUser()
 	}
 }
 
+/*
+ * hasInstallerAccess
+* Checks if the account that's logged in is either an 'installer' or 'super admin'
+*/
+function hasInstallerAccess()
+{
+	//debug('[hasInstallerAccess] $_SESSION[\'M2M_SESH_USERAL\'] = ' .$_SESSION['M2M_SESH_USERAL']);
+
+	if(!empty($_SESSION['M2M_SESH_USERAL']) && $_SESSION['M2M_SESH_USERAL'] < 200)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
 
 /*
  * hasSubmitAccess

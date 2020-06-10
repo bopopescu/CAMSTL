@@ -13,7 +13,7 @@ define('_MAX_TEMPLATE_FILE_SIZE', '61440'); //60KB
 
 $dbconfig = new dbconfigController();
 //Check form submission
-if(!empty($_REQUEST) && !empty($_REQUEST['csrfToken']) && $_REQUEST['csrfToken'] == $_SESSION['csrfToken'] && isset($_SESSION['M2M_SESH_USERAL']) && $_SESSION['M2M_SESH_USERAL'] == 200)
+if(!empty($_REQUEST))
 {
 	debug('=========_REQUEST=============', $_REQUEST);
 
@@ -65,36 +65,6 @@ function updateSettings($p_dbconfig, $request)
 	$result['fields'] = '';
 	$result['getParams'] = '';
 
-
-	if(!empty($request['LensEnable']))
-	{
-		$LensEnable = $request['LensEnable'];
-		$app = 'isc-lens';
-		$key = 'ModbusEnabled';
-		if(isOff($LensEnable))
-		{
-			$settingsSaved = $p_dbconfig->setDbconfig($app, $key, 0);
-		}
-		else
-		{
-			$settingsSaved = $p_dbconfig->setDbconfig($app, $key, 1);
-		}
-	}
-	if(!empty($request['EthernetEnable']))
-	{
-		$EthernetEnable = $request['EthernetEnable'];
-		$app = 'RedStone';
-		$key = 'Ethernet';
-		if(isOff($EthernetEnable))
-		{
-			$settingsSaved = $p_dbconfig->setDbconfig($app, $key, 0);
-		}
-		else
-		{
-			$settingsSaved = $p_dbconfig->setDbconfig($app, $key, 1);
-		}
-	}
-	
 	if(!empty($request['enable']))
 	{
 		$enable = $request['enable'];
@@ -112,7 +82,7 @@ function updateSettings($p_dbconfig, $request)
 			$modbus_results['enable'] = $p_dbconfig->setDbconfig('feature', 'modbus-monitor', 1);
 			$p_dbconfig->setDbconfig('feature', 'can-odb2-monitor', 0);  // turn can back on when modbus is off
 			$modbus_results['qDelaySeconds'] = ((isValidNumber($request['qDelaySeconds'])&& ($request['qDelaySeconds'] >= 0))?
-		($p_dbconfig->setDbconfig($app, 'q_delay_seconds', $request['qDelaySeconds'])):false);
+				($p_dbconfig->setDbconfig($app, 'q_delay_seconds', $request['qDelaySeconds'])):false);
 			$modbus_results['periodicSeconds'] = ((isValidNumber($request['periodicSeconds'])&&($request['periodicSeconds'] > 0))?
 				($p_dbconfig->setDbconfig($app, 'periodic_seconds', $request['periodicSeconds'])):false);
 			$modbus_results['periodicOveriridiumMinutes'] = ((isValidNumber($request['periodicOveriridiumMinutes']))?

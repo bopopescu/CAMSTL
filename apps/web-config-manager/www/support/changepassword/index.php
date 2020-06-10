@@ -33,11 +33,13 @@
 				</div>
 				<p style="font-family: Arial; font-size: 14px; color: #555555;padding-left:25px;">
 					<span style="color:#002539;font-weight:bold;">Toll Free:</span>
-						1-877-367-4638 &nbsp;&nbsp;
+						1-877-352-8522&nbsp;&nbsp;
 					<span style="color:#143d8d;">|</span>
-					<span style="color:#002539;font-weight:bold;">E-Mail:</span>
-						inetadmin@indsci.com &nbsp;&nbsp;
 					&nbsp;&nbsp;
+					<span style="color:#002539;font-weight:bold;"> In Calgary:</span>
+						403-252-5007&nbsp;&nbsp;
+					<span style="color:#002539;">|</scan>
+					&nbsp;&nbsp;<a style="color:#002539;font-weight:bold; text-decoration:none;" href="http://www.aware360.com" target="_blank">www.aware360.com</a>
 				</p>
 
 				<?php include '../supporttabs.php'; ?>
@@ -53,7 +55,10 @@
 
 				<div id="changepwd">
 
+
+
 				<form method="post" id="chgPassword" action="/inc/password_processor.php">
+					<div><hr class="hr"></hr></div>
 
 					<div class="row">
 						<span class="label">Enter <strong><?php echo (!empty($_SESSION['M2M_SESH_USERNAME']) ? $_SESSION['M2M_SESH_USERNAME'] : 'your');  ?></strong> password</span>
@@ -61,7 +66,6 @@
 							<input type="password" size="35" name="authPwd" /><!-- extpwdID -->
 							<br />
 							<span class="errorMsg" name="authPwdError"></span>
-							<input type="hidden" name="csrfToken" value="<?php echo (!empty($_SESSION['csrfToken']) ? $_SESSION['csrfToken'] : 'noData'); ?>" />
 						</span>
 					</div>
 
@@ -93,7 +97,6 @@
 						</span>
 					</div>
 					<div class="spacer">&nbsp;</div>
-					<div class="hr"><hr /></div>
 					<div class="row">
 					<span class="formw">
 						<button type="submit" class="button2-link">Save</button>&nbsp;

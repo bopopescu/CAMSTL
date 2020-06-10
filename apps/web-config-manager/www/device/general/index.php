@@ -35,7 +35,8 @@
 					<div class="inversetab">Status</div>
 					<!--- <a href="/TL3000_HTML5/Default_CSH.htm#STATUS" TARGET="_blank"><img src="/images/help.png" alt="help" border="0" ></a> --->
 					<div class="hr"><hr /></div>
-						<!-- <form> -->
+					<br/>
+						<form>
 							<div class="row">
 								<span class="label">Serial number</span>
 								<span class="formw"> 
@@ -43,7 +44,7 @@
 
 								</span>
 							</div>
-							<?php if(isAdmin()){ ?>
+							<?php if(isSuperAdmin()){ ?>
 							<div class="row">
 								<span class="label">Model</span>
 								<span class="formw"> 
@@ -66,6 +67,8 @@
 									<label class="label2" for="lastDate"><?php echo (!empty($device['last_firmware_update']) ? $device['last_firmware_update'] : ''); ?></label>
 								</span>
 							</div>
+							
+							<br/>
 							<br/>
 							<br/>
 							</div>
@@ -74,6 +77,14 @@
 							<!-- Wakeup related data section -->
 							<div class="inversetab">Wakeups</div>
 							<div class="hr"><hr /></div>
+							
+							<div class="row">
+								<span class="label">Last Heartbeat</span>
+								<span class="formw"> 
+									<label class="label2"><?php echo (!empty($last_heartbeat) ? $last_heartbeat : 'Never'); ?></label>
+								</span>
+							</div>
+							<br/>
 
 							<div class="row">
 								<span class="label">Most Recent Wakeup</span>
@@ -93,9 +104,68 @@
 							</div>
 							<br/>
 							<br/>
+							<br/>
+						
+							
+							<!-- CAMS related data section -->
+							<div class="inversetab">CAMS</div>
+							<div class="hr"><hr /></div>
+							<div class="row">
+								<span class="label2">CAMS </span>
+								<span class="formw">
+								  <label><?php echo isOn($cams_status) ? "On" : "Off"; ?> </label>
+								</span>
+							</div>
+							<?php if (isOn($cams_status)){ ?>
+								<div class="row">
+									<span class="label2">Host</span>
+									<span class="formw">
+									  <label><?php echo $cams_host; ?>:<?php echo $cams_port; ?> </label>
+									</span>
+								</div>
+								<div class="row">
+									<span class="label2">Compression </span> 
+								<span class="formw">
+								  <label><?php echo isOn($cams_compression) ? "On" : "Off"; ?> </label>
+								</span>
+								</div>
+							<?php } ?>
+							
+							<?php if(isSuperAdmin()){ ?>
+							<br/>
+							<br/>
+							<br/>
+							<div class="inversetab">Configuration</div>
+							<div class="hr"><hr /></div>
+							<div class="row">
+								<span class="label">Database Last Synced</span>
+								<span class="formw">  
+									<label for="lastSync"><?php echo (!empty($device['last_sync']) ? $device['last_sync'] : ''); ?> &nbsp;
+									<!--<button class="button-link">Sync</button></label>-->
 
+								</span>
+							</div>
+							<div class="row">
+								<span class="label">Import XML Configuration File</span>
+								<span class="formw">
+										<input
+											type="text" size="26" name="ImportConfig" disabled="disabled">&nbsp;
+												<button class="button-link" disabled="disabled">...</button>&nbsp;
+												<button class="button-link" disabled="disabled">
+													<b>Upload</b>
+												</button>
+										
+										</span>
+							</div>
+							<div class="row">
+								<span class="label">Export XML Configuration File</span>
+								<span class="formw">
+												<input type="button" class="button-link" onclick="window.location='/inc/export-settings.php'" value="Export"/>
+								</span>
+							</div>
+							<?php } ?>
 							<div class="spacer">&nbsp;</div>
-						<!-- </form> -->
+						</form>
 					</div>
 				</div>
 	</div><!-- end of entire div container -->

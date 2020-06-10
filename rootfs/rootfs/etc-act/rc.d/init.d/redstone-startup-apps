@@ -27,7 +27,7 @@
 
 	printf 'start_logging\r' | socat - unix-connect:/var/run/redstone/rtc-monitor
 	run-app 'Ignition Monitor' IgnitionMonitor&
-	run-app 'Check-For-Internet' /usr/bin/check-for-inet &
+	#run-app 'Check-For-Internet' /usr/bin/check-for-inet &
 
 	feature_configured=`db-config get -v feature-monitor configured`
 
@@ -49,15 +49,15 @@
 		db-config set feature message-assembler 1
 		db-config set feature packetizer-iridium 0
 		db-config set feature packetizer-calamps 0
-		db-config set feature packetizer-cams 0
+		db-config set feature packetizer-cams 1
 		db-config set feature packetizer_dash 0
 		db-config set feature can-gm-seatbelt-monitor ''
 		db-config set feature can-ford-seatbelt-monitor ''
 		db-config set feature can-dodge-seatbelt-monitor ''
 		db-config set feature can-j1939-monitor ''
 		db-config set feature wifi-monitor 0
-		db-config set feature packetizer-inet 1
-		db-config set feature isc-lens 1
+		db-config set feature packetizer-inet 0
+		db-config set feature isc-lens 0
 		db-config set feature-monitor configured 1
 	fi
 
@@ -77,8 +77,9 @@
 	db-config set -u feature battery-monitor 1
 	db-config set -u feature NMEA 1
 	db-config set -u feature SER_GPS 1
-	db-config set feature packetizer-inet 1
-	db-config set feature isc-lens 1
+	db-config set feature packetizer-inet 0
+	db-config set feature isc-lens 0
+	db-config set feature packetizer-cams 1
 
 	db-config set PositionUpdate Time 0
 	db-config set PositionUpdate Heading 0

@@ -19,7 +19,7 @@ function checkIpConflict(intf, rowId)
 	  dataType: "text",
 	  async: true,
 	  cache: false,
-	  url: 'https://'+window.location.hostname+'/inc/ajax.php',
+	  url: 'http://'+window.location.hostname+'/inc/ajax.php',
 	  data: { op: 'getip', data: intf },
 	  beforeSend:function(){
 		  //alert(intf);
@@ -36,7 +36,7 @@ function checkIpConflict(intf, rowId)
 				var intfAlias = "";
 				if(intf == "eth0"){ intfAlias = "Ethernet";}
 
-				if(intf == "ra0"){ intfAlias = "WiFi";}
+				if(intf == "ra0"){ intfAlias = "Wi-Fi";}
 
 				$("#" + rowId + " > .errorMsg").text("This subnet is in use by the "+ intfAlias + " interface.");
 				enableStatusSavebtn($("#" + rowId).parents("form").attr("id"));

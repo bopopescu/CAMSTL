@@ -20,10 +20,10 @@ class gpscontroller
 		 * @return SimpleXMLElement object $gps
 		 * @author - Sean Toscano (sean@absolutetrac.com)
 		 */
-	function getGpsData()
-	{
-		$gps = null;
-		$nodata = '--';
+		function getGpsData()
+		{
+			$gps = null;
+			$nodata = '--';
 
 		$xml = $this->getGps();		//Get the GPS data xml
 
@@ -175,12 +175,32 @@ class gpscontroller
 			{
 				$gps->addChild('velocity', $nodata);
 			}
-		}
-		else
-		{
-		}
-		return $gps;
-	} //END getGpsData
+
+			//OBD Speed
+			if(!empty($gps->obdspeed) || round($gps->obdspeed) == 0)
+			{
+				$gps->obdspeed = round($gps->obdspeed).' kph';
+			}
+			else if(isset($gps->obdspeed))
+			{
+				$gps->obdspeed = $nodata;
+			}
+			else
+			{
+				$gps->addChild('obdspeed', $nodata);
+			}
+
+
+			//$gps->addChild('type',$this->getGpsType());		//get gps chip type (eg: Telit, Gobi, ublox)
+
+			}
+			else
+			{
+
+			}
+			return $gps;
+
+		} //END getGpsData
 
 		/**
 				 * decimalToNDD

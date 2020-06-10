@@ -18,7 +18,7 @@ if(empty($_SESSION['M2M_SESH_USERID']) && empty($_SESSION['M2M_SESH_USERAL']))
 			$dt = new db_sqlite3();
 			$conn = $dt->connect_sqlite(DB);		//connect to db
 			$sql_login = 'select * from user_profile where username = :user and password = :passwd';	//sql prepared statement
-		     $creds = array(':user' => $_REQUEST['user'], ':passwd' => md5($_REQUEST['pass']));				   //prepared statement data
+			$creds = array(':user'=>$_REQUEST['user'],':passwd'=>md5($_REQUEST['pass']));				//prepared statement data
 
 			$result_login = $dt->query_sqlite($conn, $sql_login, $creds);	//execute query
 			debug('(login_controller.inc) User-entered credentials lookup db result',$result_login);		//DEBUG
@@ -26,8 +26,8 @@ if(empty($_SESSION['M2M_SESH_USERID']) && empty($_SESSION['M2M_SESH_USERAL']))
 			//if valid credentials, redirect users to url passed in http referrer or to index page
 			if(count($result_login) > 0)
 			{
-				session_regenerate_id();     //Regenerate session ID to prevent session fixation attacks
-                                $_SESSION['csrfToken'] = md5(uniqid(rand(), true));
+				session_regenerate_id();		//Regenerate session ID to prevent session fixation attacks
+
 				$_SESSION['M2M_SESH_USERID'] = $result_login[0]['u_id'];			//set user id in Session
 				$_SESSION['M2M_SESH_USERNAME'] = $result_login[0]['username'];		//set user name in Session
 				$_SESSION['M2M_SESH_USERAL'] = $result_login[0]['access_level'];	//set user access level in Session
@@ -126,7 +126,6 @@ include $_SERVER['DOCUMENT_ROOT'] . 'mainscriptsgroup.php';
 					{
 						if(($key != 'ref')&&($key != 'user')&&($key != 'pass'))
 						{
-							$value = (!empty($value) ? htmlspecialchars($value, ENT_QUOTES, 'UTF-8'):'');
 							echo "<input type='hidden' name='$key' value='$value' />";
 						}
 					}

@@ -36,32 +36,6 @@ if(isset($_GET['templateName']) && $_GET['templateName'] !== false)
 	debug("templateName=", $templateName);
 }
 
-if(isset($_GET['LensEnable']) && $_GET['LensEnable'] !== false)
-{
-	$value = $_GET['LensEnable'];
-	$LensEnable = ((strcmp($value, "On") == 0));
-}
-else
-{
-	$value = $dbconfig->getDbconfig('isc-lens', 'ModbusEnabled');
-	$value = hex2bin(trim($value));
-	debug("LensEnable=", $value);
-	$LensEnable = ($value == 1);
-}
-
-if(isset($_GET['EthernetEnable']) && $_GET['EthernetEnable'] !== false)
-{
-	$value = $_GET['EthernetEnable'];
-	$EthernetEnable = ((strcmp($value, "On") == 0));
-}
-else
-{
-	$value = $dbconfig->getDbconfig('RedStone', 'Ethernet');
-	$value = hex2bin(trim($value));
-	debug("EthernetEnable=", $value);
-	$EthernetEnable = ($value == 1);
-}
-
 if(isset($_GET['enable']) && $_GET['enable'] !== false)
 {
 	$value = $_GET['enable'];

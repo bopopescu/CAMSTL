@@ -47,7 +47,13 @@
 						<div class="hr"><hr /></div>
 
 						<form id="gps" method="post" action="/inc/gps_processor.php">
-							<input type="hidden" name="csrfToken" value="<?php echo (!empty($_SESSION['csrfToken']) ? $_SESSION['csrfToken'] : 'noData'); ?>" />
+							<div class="row">
+								<span class="label">GPS Reporting</span>
+								<span class="formw">
+									<input type="radio" name="gpsReporting" value="Live" <?php echo ($gpsReport != "Fixed") ? 'checked="checked"' : '';echo $radio_disable;?> /> Live&nbsp;
+									<input type="radio" name="gpsReporting" value="Fixed" <?php echo ($gpsReport == "Fixed") ? 'checked="checked"' : '';echo $radio_disable;?> />Fixed
+								</span>
+							</div>
 							<div class="row">
 								<span class="label">GPS Time</span>
 								<span class="formw">
@@ -74,6 +80,16 @@
 									<input type="text" size="15" readonly="readonly" id="latitude" value="<?php echo $latitude; ?>"/>
 								</span>
 							</div>
+							<div class="row gpsFixed">
+								<span class="label">Latitude</span>
+								<span class="formw units">
+									<select name="latDir" >
+										<option value="N" <?php echo ($latDirFix == 'N')?'selected="selected"':''; ?> >N</option>
+										<option value="S" <?php echo ($latDirFix == 'S')?'selected="selected"':''; ?> >S</option>
+									</select>&nbsp;
+									<input type="text" name="latDeg" size="15" value="<?php echo $latDegFix; ?>" />&nbsp;&deg;&nbsp;
+								</span>
+							</div>
 
 							<div class="row gpsLive">
 								<span class="label">Longitude</span>
@@ -81,11 +97,28 @@
 									<input type="text" size="15" readonly="readonly" id="longitude" value="<?php echo $longitude; ?>"/>
 								</span>
 							</div>
+							<div class="row gpsFixed">
+								<span class="label">Longitude</span>
+								<span class="formw units">
+									<select name="lonDir" >
+										<option value="E" <?php echo ($lonDirFix == 'E')?'selected="selected"':''; ?> >E</option>
+										<option value="W" <?php echo ($lonDirFix == 'W')?'selected="selected"':''; ?> >W</option>
+									</select>&nbsp;
+									<input type="text" name="lonDeg" size="15" value="<?php echo $lonDegFix; ?>" />&nbsp;&deg;&nbsp;
+									<span class="errorMsg"></span>
+								</span>
+							</div>
 
 							<div class="row gpsLive">
 								<span class="label">Elevation</span>
 								<span class="formw">
 									<input type="text" size="25" readonly="readonly" id="elevation" value="<?php echo $elevation; ?>"/>
+								</span>
+							</div>
+							<div class="row gpsFixed">
+								<span class="label">Elevation</span>
+								<span class="formw">
+									<input type="text" name="elevation" size="2" value="<?php echo $elevationFix?>" />&nbsp;m (above sea level)
 								</span>
 							</div>
 
@@ -103,6 +136,14 @@
 								</span>
 							</div>
 
+							<div class="row">
+								<span class="label">OBD Speed</span>
+								<span class="formw">
+									<input type="text" size="16" readonly="readonly" id="obdSpeed" value="<?php echo $obdspeed; ?>"/>
+									<br />
+									<span class="fieldMessage">*only if Speed Source is set to OBD</span>
+								</span>
+							</div>
 
 							<div class="row">
 								<span class="label">Number of Satellites</span>
@@ -128,10 +169,9 @@
 
 							<div class="spacer">&nbsp;</div>
 							<?php
-							if (0) //(hasSubmitAccess()) // not needed for LENS - there is nothing to change.
+							if(hasSubmitAccess())
 							{
 							?>
-							<div class="hr"><hr /></div>
 							<div class="row">
 								<span class="formw">
 									<button type="submit" class="button2-link">Save</button>&nbsp;
@@ -148,4 +188,3 @@
 		</div> <!--  end container -->
 </body>
 </html>
-

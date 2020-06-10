@@ -7,98 +7,79 @@ require_once $_SERVER['DOCUMENT_ROOT'].'/inc/password_controller.inc';
 
 	$passwd_ctrl = new passwordController();
 	
-	if(!empty($_REQUEST) && !empty($_REQUEST['csrfToken']) && $_REQUEST['csrfToken'] == $_SESSION['csrfToken'])
+	if(!empty($_REQUEST))
 	{
 		debug('[change_password.php] $_REQUEST param:', $_REQUEST); 	//DEBUG
 		//print_r($_REQUEST);
 		
 		//check for empty fields
-		if(!empty($_REQUEST['loginProfile']) && 
-		($_SESSION['M2M_SESH_USERID'] == $_REQUEST['loginProfile'] || 
-		$_SESSION['M2M_SESH_USERAL']  == 200)) {
-			if(!empty($_REQUEST['authPwd']) && !empty($_REQUEST['newPwd'])  && !empty($_REQUEST['confirmNewPwd']))	
+		if(!empty($_REQUEST['authPwd']) && !empty($_REQUEST['newPwd']) && !empty($_REQUEST['confirmNewPwd']) && !empty($_REQUEST['loginProfile']))	
+		{
+			//check that new and re-entered passwords match
+			if(strcasecmp($_REQUEST['newPwd'],$_REQUEST['confirmNewPwd']) === 0)	
 			{
-				//check that new and re-entered passwords match
-				if(strcasecmp($_REQUEST['newPwd'],$_REQUEST['confirmNewPwd']) === 0)	
+				//check that the authorizing account's password is correct
+				if($passwd_ctrl->verifyUserCreds($_SESSION['M2M_SESH_USERID'], $_REQUEST['authPwd']))	
 				{
-					//check that the authorizing account's password is correct
-					if($passwd_ctrl->verifyUserCreds($_SESSION['M2M_SESH_USERID'], $_REQUEST['authPwd']))	
+					if($passwd_ctrl->changeUserPassword($_REQUEST['loginProfile'], $_REQUEST['newPwd']))	//change the password
 					{
-						if($passwd_ctrl->changeUserPassword($_REQUEST['loginProfile'], $_REQUEST['newPwd']))	//change the password
+						//password successfully changed
+						$resetSessionCode = '';
+						
+						//the password for the currently logged in account has been changed
+						if($_REQUEST['loginProfile'] == $_SESSION['M2M_SESH_USERID'])
 						{
-							//password successfully changed
-							$resetSessionCode = '';
-							
-							//the password for the currently logged in account has been changed
-							if($_REQUEST['loginProfile'] == $_SESSION['M2M_SESH_USERID'])
-							{
-								$resetSessionCode = ',53';
-							}
-							
-							//the password for the user account has been changed
-
-							if($_REQUEST['loginProfile'] == "3")
-							{
-								require_once $_SERVER['DOCUMENT_ROOT'].'inc/dbconfig_controller.inc';
-								$dbconfig = new dbconfigController();
-								$dbconfig->setDbconfigData('isc-lens', 'IsPasswordSet', 1);
-							}
-							else
-							{
-								require_once $_SERVER['DOCUMENT_ROOT'].'inc/dbconfig_controller.inc';
-								$dbconfig = new dbconfigController();
-							}
-							header("location:https://".$_SERVER['HTTP_HOST']."/support/changepassword/index.php?success=true&module=password&codes=50".$resetSessionCode);
-							
+							$resetSessionCode = ',53';
 						}
-						else
-						{
-							//failed to change password
-							header("location:https://".$_SERVER['HTTP_HOST']."/support/changepassword/index.php?success=false&module=password&codes=51");
-						}
+						
+						header("location:http://".$_SERVER['HTTP_HOST']."/support/changepassword/index.php?success=true&module=password&codes=50".$resetSessionCode);
+						
 					}
 					else
 					{
-						//user's credentials are incorrect
-						header("location:https://".$_SERVER['HTTP_HOST']."/support/changepassword/index.php?success=false&module=password&codes=52&fields=authPwd");
+						//failed to change password
+						header("location:http://".$_SERVER['HTTP_HOST']."/support/changepassword/index.php?success=false&module=password&codes=51");
 					}
 				}
 				else
 				{
-					header("location:https://".$_SERVER['HTTP_HOST']."/support/changepassword/index.php?success=false&module=password&codes=55&fields=newPwd,confirmNewPwd");
+					//user's credentials are incorrect
+					header("location:http://".$_SERVER['HTTP_HOST']."/support/changepassword/index.php?success=false&module=password&codes=52&fields=authPwd");
 				}
 			}
 			else
 			{
-				$emptyField = '';
-				
-				foreach($_REQUEST as $key => $value)
-				{
-					if(empty($value))
-					{
-						
-						if(!empty($emptyField))
-						{
-							$delim = ',';	
-						}
-						else
-						{
-							$delim = '';
-						}
-							
-						$emptyField .= $delim.$key;
-						
-					}
-				}
-				
-				header("location:https://".$_SERVER['HTTP_HOST']."/support/changepassword/index.php?success=false&module=password&codes=54&fields=".$emptyField);
+				header("location:http://".$_SERVER['HTTP_HOST']."/support/changepassword/index.php?success=false&module=password&codes=55&fields=newPwd,confirmNewPwd");
 			}
-		} else {
-			header("location:https://".$_SERVER['HTTP_HOST']."/support/changepassword/index.php?success=false&module=password&codes=51");
 		}
+		else
+		{
+			$emptyField = '';
+			
+			foreach($_REQUEST as $key => $value)
+			{
+				if(empty($value))
+				{
+					
+					if(!empty($emptyField))
+					{
+						$delim = ',';	
+					}
+					else
+					{
+						$delim = '';
+					}
+						
+					$emptyField .= $delim.$key;
+					
+				}
+			}
+			
+			header("location:http://".$_SERVER['HTTP_HOST']."/support/changepassword/index.php?success=false&module=password&codes=54&fields=".$emptyField);
+		}		
 	}
 	else
 	{
-		header("location:https://".$_SERVER['HTTP_HOST']."/support/changepassword/index.php");
+		header("location:http://".$_SERVER['HTTP_HOST']."/support/changepassword/index.php");
 	}
 ?>

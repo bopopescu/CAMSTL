@@ -13,7 +13,7 @@ $(document).ready(function()
 		  active: $("#settings").tabs({ active: $.cookie("tabs3_settings_selected") })
 	  });
 
-	  // Network Configuration Tab: WiFi sub-tabs
+	  // Network Configuration Tab: Wi-Fi sub-tabs
 	  $("#wifi").tabs({
 		  activate: function( event, ui ) {
 			  $.cookie("tabs3_wifi_selected", $("#wifi").tabs("option","active"));

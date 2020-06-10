@@ -21,7 +21,7 @@ $(document).ready(function()
 				  dataType: "text",		//changed this from xml to text to avoid any issues parsing xml.
 				  async: true,
 				  cache: false,
-				  url: 'https://'+window.location.hostname+'/inc/gps_view.php',
+				  url: 'http://'+window.location.hostname+'/inc/gps_view.php',
 				  data: { op: 'gpsupdate' },
 				  beforeSend:function(){
 					  //$(".msgBox .gpsFailed").remove();
@@ -46,7 +46,7 @@ $(document).ready(function()
 
 	function updateGpsInfo(gps)
 	{
-		var time = satellites = latitude = longitude = elevation = heading = hdop = quality = velocity = '--';
+		var time = satellites = latitude = longitude = elevation = heading = hdop = quality = velocity = obdSpeed = '--';
 
 		if(gps === null || gps.length === 1)	//if no data is returned by the server/device
 		{
@@ -68,6 +68,7 @@ $(document).ready(function()
 			hdop = $(gpsdata).find('hdop').text();
 			quality = $(gpsdata).find('quality').text();
 			velocity = $(gpsdata).find('velocity').text();
+			obdSpeed = $(gpsdata).find('obdspeed').text();
 		}
 
 		$("#gpsTime").val(time);
@@ -79,6 +80,7 @@ $(document).ready(function()
 		$("#hdop").val(hdop);
 		$("#quality").val(quality);
 		$("#velocity").val(velocity);
+		$("#obdSpeed").val(obdSpeed);
 
 	}
 	function displayGpsFailureMsg()
@@ -94,8 +96,8 @@ $(document).ready(function()
 	}
 
 
-//	$('input[name="gpsReporting"]').change(displayLatLongFields);
-//	displayLatLongFields();
+	$('input[name="gpsReporting"]').change(displayLatLongFields);
+	displayLatLongFields();
 
 }); //END doc ready()
 function displayLatLongFields()

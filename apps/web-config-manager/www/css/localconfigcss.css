@@ -97,7 +97,7 @@ div.contentblock
 {
 	margin: 0 auto;
 	position: absolute;
-	top: 173px;
+	top: 169px;
 	background: #ffffff;
 	border-top-left-radius: 4px;
 	border-bottom-left-radius: 4px;
@@ -878,13 +878,6 @@ div.rowl span.formwl
 	text-align: left;
 }
 
-div.rowl span.formwll
-{
-	float: right;
-	width: 400px;
-	text-align: left;
-}
-
 div.spacer
 {
 	clear: both;
@@ -1510,16 +1503,6 @@ div.row span.formw
 	margin-top: 5px;
 }
 
-div.row span.subformw
-{
-	float: right;
-	width: 400px;
-	text-align: left;
-	font-family: Arial;
-	font-size: 13px;
-	margin-top: 5px;
-}
-
 div.row span.label2, div.row-wide span.label2
 {
 	float: left;
@@ -1543,12 +1526,6 @@ div.row span.label3
 }
 
 div.row span.formw2
-{
-	float: right;
-	width: 300px;
-	text-align: left;
-}
-div.row span.formw3
 {
 	float: right;
 	width: 300px;

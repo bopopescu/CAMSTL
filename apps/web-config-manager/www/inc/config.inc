@@ -1,5 +1,5 @@
 <?php
- define("DEVICE_NAME", "TGX Configuration Manager");
+ define("DEVICE_NAME", "TruLink Configuration Manager");
  define("DB", $_SERVER['DOCUMENT_ROOT'].'/../www-app/config_mang.db');
  define ("DEBUG", "ON");
  define("ethernet", "eth0");

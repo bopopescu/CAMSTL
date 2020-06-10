@@ -6,7 +6,20 @@ $(document).ready(function () {
 
 	// script to switch encryption mode based off of authentication mode
 	if ($("form#wifi-ap select[name = 'authtype'] option:selected").val() != "") {
+
 		setWifiEncrypt();
+
+		$("form#wifi-ap span[name = 'pwdMessage']").text("*Password will remain unchanged unless a new password is entered or the SSID is changed");
+		$("form#wifi-ap span[name = 'errorPassword']").empty();
+	}
+
+	if ($("form#wifi-ap select[name = 'encryptype'] option:selected").val() == "NONE") {
+
+		$("form#wifi-ap span[name = 'pwdMessage']").text("");
+		$("form#wifi-ap span[name = 'errorPassword']").empty();
+		$("form#wifi-ap span[name = 'rerrorPassword']").empty();
+		$("form#wifi-ap input[name = 'wifipassword']").attr('disabled', true);
+		$("form#wifi-ap input[name = 'rwifipassword']").attr('disabled', true);
 	}
 
 	g_wifi_ap_ssid = $("form#wifi-ap input[name='ssid']").val();
@@ -20,15 +33,8 @@ $(document).ready(function () {
 	$("form#wifi-ap input[name = edhcpoct2]").val($("form#wifi-ap input[name = wipoct2]").val());
 	$("form#wifi-ap input[name = sdhcpoct3]").val($("form#wifi-ap input[name = wipoct3]").val());
 	$("form#wifi-ap input[name = edhcpoct3]").val($("form#wifi-ap input[name = wipoct3]").val());
-
-	// Disabled the DHCP fields if DHCP server is Disabled
-	if ($("form#ethernet input[name = dhcpserver]:checked").val() == 'Disabled') {
-		disableDHCPsettings("wifi-ap");
-	} else {
-		enableDHCPsettings("wifi-ap");
-	}
-
 	/*********** On Page Load - Form mods: End *******************/
+
 
 	/*********** Bind Event handlers for form elements: Begin ******************/
 
@@ -36,20 +42,39 @@ $(document).ready(function () {
 		setWifiEncrypt();
 	});
 
+	// script to show password
+	$("form#wifi-ap input[name = 'showPwd']").click(function() {
+		var shwPwdCbxCheck = $(this);
+		if (shwPwdCbxCheck.is(':checked'))
+		{
+			//$("form#wifi-ap input[name = 'wifipassword']").get(0).type = 'text';
+			//$("form#wifi-ap input[name = 'rwifipassword']").get(0).type = 'text';
+			$("form#wifi-ap input[name = 'wifipassword'], form#wifi-ap input[name = 'rwifipassword']").attr('type', 'text');
+		}
+		else
+		{
+			//$("form#wifi-ap input[name = 'wifipassword']").get(0).type = 'password';
+			//$("form#wifi-ap input[name = 'rwifipassword']").get(0).type = 'password';
+			$("form#wifi-ap input[name = 'wifipassword'], form#wifi-ap input[name = 'rwifipassword']").attr('type', 'password');
+		}
+	 });
+
 	$("form#wifi-ap input[type='button']").click(function() {
 	  $("#leasestable").load("index.php #leasestable");
 	});
 
 	// When the first IP octet of the Ethernet IP changes, update the first octet of the DHCP Start and End IPs
 	$("form#wifi-ap input[name = 'wipoct1']").change(function () {
+
 		$("form#wifi-ap input[name = 'sdhcpoct1']").val($("form#wifi-ap input[name = 'wipoct1']").val());
-		$("form#wifi-ap input[name = 'edhcpoct1']").val($("form#wifi-ap input[name = 'wipoct1']").val());
+		$("form#wifi-ap input[name = 'wdhcpoct1']").val($("form#wifi-ap input[name = 'wipoct1']").val());
 		validateDHCPSettings("wifi-ap");
 
 	});
 
 	// When the second IP octet of the Ethernet IP changes, update the second octet of the DHCP Start and End IPs
 	$("form#wifi-ap input[name = 'wipoct2']").change(function () {
+
 		$("form#wifi-ap input[name = 'sdhcpoct2']").val($("form#wifi-ap input[name = 'wipoct2']").val());
 		$("form#wifi-ap input[name = 'edhcpoct2']").val($("form#wifi-ap input[name = 'wipoct2']").val());
 		validateDHCPSettings("wifi-ap");
@@ -57,6 +82,7 @@ $(document).ready(function () {
 
 	// When the third IP octet of the Ethernet IP changes, update the third octet of the DHCP Start and End IPs
 	$("form#wifi-ap input[name = 'wipoct3']").change(function () {
+
 		$("form#wifi-ap input[name = 'sdhcpoct3']").val($("form#wifi-ap input[name = 'wipoct3']").val());
 		$("form#wifi-ap input[name = 'edhcpoct3']").val($("form#wifi-ap input[name = 'wipoct3']").val());
 		validateDHCPSettings("wifi-ap");
@@ -72,11 +98,12 @@ $(document).ready(function () {
 		validateIP("wip");
 		validateDHCPSettings("wifi-ap");
 	});
-	
+
+	$WiFiAPEnable = initializeFields('wifi-ap', 'wifi-accesspoint', 'wifi-ap-enable', 'dhcp-server-section', 'dhcpserver');
 	$WiFiDHCPEnable = initializeFields('wifi-ap', 'dhcp-server-section', 'dhcpserver', null, null, on_enable_dhcp, on_disable_dhcp);
+	$WiFiClientEnable = initializeFields('update_wifi', 'update_wifi', 'wifi-client-enable', null, null, on_enable_wifi_client, on_disable_wifi_client);
 
 	$("form#wifi-ap input, form#wifi-ap select").on("change keyup", validateWiFiAP);
-
 	validateWiFiAP();
 	/*********** Bind Event handlers for form elements: End ******************/
 
@@ -88,6 +115,21 @@ function validateWiFiAP()
 	var enable = true;
 	//validate ssid always
 	enable &= ($("form#wifi-ap input[name='ssid']").prop('disabled')?true: isNotEmpty($("form#wifi-ap input[name='ssid']")));
+	//check if ssid | auth | encrypt changed from original
+	if(($("form#wifi-ap input[name='ssid']").val() != g_wifi_ap_ssid) ||
+		($("form#wifi-ap select[name='authtype']").val() != g_wifi_ap_authtype) ||
+		($("form#wifi-ap select[name='encryptype']").val() != g_wifi_ap_encryptype) ||
+		($("form#wifi-ap input[name = 'wifipassword']").val() != "") ||
+		($("form#wifi-ap input[name = 'rwifipassword']").val() != ""))
+	{
+		//	validate password
+		enable &= passwordCheck();
+	}
+	else
+	{
+		$("form#wifi-ap span[name = 'wifipwdMessage']").text("*Password will remain unchanged unless a new password is entered or the SSID is changed");
+		$("form#wifi-ap span[name = 'wifipwdMessage']").next(".errorMsg").before("<br>");
+	}
 
 	//validate IP and subnet
 	enable &= ($("#wip input").prop("disabled"))? true: hasValidIP("wip");
@@ -227,3 +269,4 @@ function checkPasswordMatch($id, $id2)
 			return true;
 		}
 }
+

@@ -8,7 +8,7 @@ $dbconfig = new dbconfigController();
 
 
 //Check form submission
-if(!empty($_REQUEST) && !empty($_REQUEST['csrfToken']) && $_REQUEST['csrfToken'] == $_SESSION['csrfToken'] && isset($_SESSION['M2M_SESH_USERAL']) && $_SESSION['M2M_SESH_USERAL'] == 200)
+if(!empty($_REQUEST))
 {
 	debug('=========_REQUEST=============', $_REQUEST);	//DEBUG
 
@@ -35,14 +35,12 @@ function submitSleep($dbconfig, $request)
 
 	$sleep_result = array();	//store the success/failure state for each setting
 
+	//Low Battery Voltage
+	$sleep_result['WiFiActivity'] = (isValidNumber($request['WiFiActivity']) ? $dbconfig->setDbconfigData('system', 'WiFiClientAliveTimeoutMinutes', $request['WiFiActivity']) : false);
+	$sleep_result['WiFiActivityMax'] = (isValidNumber($request['WiFiActivityMax']) ? $dbconfig->setDbconfigData('system', 'WiFiClientMaxKeepAliveMinutes', $request['WiFiActivityMax']) : false);
+	$sleep_result['ZigBeeActivity'] = (isValidNumber($request['ZigBeeActivity']) ? $dbconfig->setDbconfigData('zigbee', 'AliveTimeoutMinutes', $request['ZigBeeActivity']) : false);
 	$sleep_result['SleepKeepAwake'] = (isValidNumber($request['SleepKeepAwake']) ? $dbconfig->setDbconfigData('RedStone', 'KeepAwakeMinutes', $request['SleepKeepAwake']) : false);
-	//$sleep_result['LowBatt'] = (isValidNumber($request['LowBatt']) ? $dbconfig->setDbconfigData('wakeup', 'ShutdownVoltage', $request['LowBatt'] * 1000) : false);
-	//$sleep_result['wakeupLowBattV'] = (isValidNumber($request['wakeupLowBattV']) ? $dbconfig->setDbconfigData('wakeup', 'CriticalVoltage', $request['wakeupLowBattV'] * 1000) : false);
-	if(isValidNumber($request['wakeupLowBattV']) && isValidNumber($request['maxCriticalVoltage']) && isValidNumber($request['minCriticalVoltage']) && $request['wakeupLowBattV'] >= $request['minCriticalVoltage'] && $request['wakeupLowBattV'] <= $request['maxCriticalVoltage']){
-		$sleep_result['wakeupLowBattV'] = $dbconfig->setDbconfigData('wakeup', 'CriticalVoltage', $request['wakeupLowBattV'] * 1000);
-	} else {
-		$sleep_result['wakeupLowBattV'] = false;
-	}
+	$sleep_result['LowBatt'] = (isValidNumber($request['LowBatt']) ? $dbconfig->setDbconfigData('wakeup', 'ShutdownVoltage', $request['LowBatt'] * 1000) : false);
 
 	debug('(sleep_processor.php|submitSleep()) $sleep_result: ', $sleep_result); 	//DEBUG
 

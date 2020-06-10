@@ -15,7 +15,7 @@ $dbconfig = new dbconfigController();
 
 
 //Check form submission
-if(!empty($_REQUEST) && !empty($_REQUEST['csrfToken']) && $_REQUEST['csrfToken'] == $_SESSION['csrfToken'] && isset($_SESSION['M2M_SESH_USERAL']) && $_SESSION['M2M_SESH_USERAL'] == 200)
+if(!empty($_REQUEST))
 {
 	$result = submitGPS($dbconfig, $_REQUEST);
 	header("location:http://".$_SERVER['HTTP_HOST']."/device/gps/index.php?success=".$result['success']."&module=".$result['module']."&codes=".implode(",",$result['codes'])."&fields=".$result['fields']."&".
@@ -42,6 +42,46 @@ function submitGPS($dbconfig, $request)
 	$lonDir = $lonDeg = $lonMin = $lonSec = '';
 	$elevation = '';
 	$result_gps = array();
+	if($request['gpsReporting'] == 'Fixed')
+	{
+		$result_gps['latDir'] = (($request['latDir'] == 'N') || ($request['latDir'] == 'S'));
+		$latDir = ($result_gps['latDir'])? $request['latDir']:'';
+
+		$result_gps['latDeg'] = (isValidNumber($request['latDeg']) && ($request['latDeg'] < 90));
+		$latDeg = ($result_gps['latDeg'])? $request['latDeg']: '';
+
+		$result_gps['lonDir'] = (($request['lonDir'] == 'E') || ($request['lonDir'] == 'W'));
+		$lonDir = ($result_gps['lonDir'])? $request['lonDir']:'';
+
+		$result_gps['lonDeg'] = (isValidNumber($request['lonDeg']) && ($request['lonDeg'] < 180));
+		$lonDeg = ($result_gps['lonDeg'])? $request['lonDeg']: '';
+
+		$result_gps['elevation'] = (isValidNumber($request['elevation']));
+		$elevation = ($result_gps['elevation'])? $request['elevation']: '';
+		if(!in_array(false, $result_gps))
+		{
+			$prevGPSReporting = $dbconfig->getDbconfigData('NMEA','Source');
+			$result_gps['gpsReporting'] = $dbconfig->setDbconfig('NMEA', 'Source', 'Fixed');
+			if($result_gps['gpsReporting'])
+			{
+				$GGAString = getGGAString($latDir, $latDeg, $latMin, $latSec, $lonDir, $lonDeg, $lonMin, $lonSec, $elevation);
+				$RMCString = getRMCString($latDir, $latDeg, $latMin, $latSec, $lonDir, $lonDeg, $lonMin, $lonSec);
+				debug("GPSStrings -GGA: ", $GGAString);
+				debug("RMC :", $RMCString);
+				$result_gps['FixedGGA'] = $dbconfig->setDbconfig('NMEA', 'FixedGGA', $GGAString);
+				$result_gps['FixedRMC'] = $dbconfig->setDbconfig('NMEA', 'FixedRMC', $RMCString);
+			}
+		}
+		else
+		{
+			$result_gps['gpsReporting'] = true;
+			$result['codes'][] = 801;
+		}
+	}
+	else
+	{
+		$result_gps['gpsReporting'] = $dbconfig->setDbconfigData('NMEA', 'Source', 'Live');
+	}
 	// 1) find all the keys in the $Satellite_result array that have a value of false (these are the API calls that failed)
 	// 2) build a string with the keys. (The key names are the same as the html element (input/radio/select) names and will be used to highlight the fields with jquery)
 	$failed_results = array_keys($result_gps, false, true);
