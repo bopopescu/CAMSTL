@@ -785,7 +785,7 @@ static void* udp_server(void* p_arg)
 	const int elen = sizeof(data->m_emsg) - 1;
 	emsg[elen] = '\0';
 
-	if((sockfd = socket(data->m_sdata->m_domain, SOCK_STREAM, 0)) == -1)
+	if((sockfd = socket(data->m_sdata->m_domain, SOCK_DGRAM, 0)) == -1)
 	{
 		const int e = errno;
 		STRERROR( e, err, 81);

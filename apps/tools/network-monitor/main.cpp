@@ -2612,7 +2612,6 @@ int main(int argc, char* argv[])
 			}
 
 		}
-		run_dhcp_server = false;
 		apply_dns_resolv_conf(md);
 
 		if(md.m_dns_interface.empty())
