@@ -81,8 +81,8 @@
 	db-config set feature isc-lens 0
 	db-config set feature packetizer-cams 1
 
-	db-config set PositionUpdate Time 0
-	db-config set PositionUpdate Heading 0
+	#db-config set PositionUpdate Time 0
+	#db-config set PositionUpdate Heading 0
 
 	# if ethernet is not set it defaults to on	
 
