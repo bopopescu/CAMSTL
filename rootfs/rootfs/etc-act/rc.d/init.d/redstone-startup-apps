@@ -27,7 +27,6 @@
 
 	printf 'start_logging\r' | socat - unix-connect:/var/run/redstone/rtc-monitor
 	run-app 'Ignition Monitor' IgnitionMonitor&
-	run-app 'Check-For-Internet' /usr/bin/check-for-inet &
 
 	feature_configured=`db-config get -v feature-monitor configured`
 
@@ -51,13 +50,8 @@
 		db-config set feature packetizer-calamps 0
 		db-config set feature packetizer-cams 1
 		db-config set feature packetizer_dash 0
-		db-config set feature can-gm-seatbelt-monitor ''
-		db-config set feature can-ford-seatbelt-monitor ''
-		db-config set feature can-dodge-seatbelt-monitor ''
 		db-config set feature can-j1939-monitor ''
 		db-config set feature wifi-monitor 0
-		db-config set feature packetizer-inet 0
-		db-config set feature isc-lens 0
 		db-config set feature-monitor configured 1
 	fi
 
@@ -66,23 +60,20 @@
 	db-config set -u feature autoupdate 1
 	db-config set -u feature power-monitor 1
 	db-config set -u feature modem-monitor 1
-#	db-config set -u feature iridium-monitor 1
 	db-config set -u feature admin-client 1
 	db-config set -u feature ssh-admin-client-tunnel 1
 	db-config set -u feature softap 1 
 	db-config set -u feature zigbee-monitor 1
 	db-config set -u feature lighttpd 1
-	db-config set -u feature ipsec-monitor 0
+	db-config set -u feature ipsec-monitor 1
 	db-config set -u feature telit-monitor 1
 	db-config set -u feature battery-monitor 1
 	db-config set -u feature NMEA 1
 	db-config set -u feature SER_GPS 1
-	db-config set feature packetizer-inet 0
-	db-config set feature isc-lens 0
+        db-config set -u feature gps-socket-server 1
+
 	db-config set feature packetizer-cams 1
 
-	#db-config set PositionUpdate Time 0
-	#db-config set PositionUpdate Heading 0
 
 	# if ethernet is not set it defaults to on	
 
@@ -94,16 +85,6 @@
 
 	#bilal@ps19 - lets enable the ethernet feature anyway for ISCP-245
 	db-config set feature ethernet 1
-
-	runModbus=`db-config get -b isc-lens ModbusEnabled`         
-
-	if [ "0" = "$runModbus" ]; then
-		db-config set feature isc-modbus 0
-	else
-		db-config set feature isc-modbus 1
-		db-config set isc-lens ModbusEnabled 1
-		/usr/bin/gpio deF
-	fi
 
 	feature-monitor &> /dev/null &
 
@@ -120,7 +101,6 @@
 	/usr/bin/crit-battery-check &
 	
 	cp /var/log/messages /tmp/logdir &
-	/usr/bin/update-inet-time &
 	# added October 2019 to ensure CCID is correct after SIM change for iNet ModBus
 	/usr/bin/GetCCID &   
 exit 0

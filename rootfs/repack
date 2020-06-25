@@ -15,7 +15,7 @@ echo "repack:  Copying the root file system"
 
 #first need to remove and lens radio scripts in the packed system
 sudo rm -rf $TMPDIR/usr/local/libexec/ipsec
-sudo rm $TMPDIR/etc-act/redstone/first-boot/lens/*
+#sudo rm $TMPDIR/etc-act/redstone/first-boot/lens/*
 
 # now copy the file system
 sudo cp -r rootfs/* $TMPDIR

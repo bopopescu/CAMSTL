@@ -5,7 +5,7 @@
 owner=`db-config get -b RedStone Owner`
 
 if [ ${#owner} -eq 0 ]; then
-	db-config set RedStone Owner ISC
+	db-config set RedStone Owner Aware360
 fi
 
 apn=`db-config get -b Cellular carrier`

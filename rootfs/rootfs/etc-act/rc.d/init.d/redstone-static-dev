@@ -21,7 +21,6 @@ mknod /dev/i2c-gpio-expander-irq c 237 0
 mknod /dev/set-gpio c 238 0
 mknod /dev/redstone-hw-config c 238 1
 mknod /dev/trulink-hwctl c 238 2
-mknod /dev/lens-urgent c 240 0
 # mknod /dev/buzzer c 239 0
 chown applet:applet /dev/set-gpio
 

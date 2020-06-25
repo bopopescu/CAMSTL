@@ -33,7 +33,7 @@ sub build_config(\% $)
 	$context->{'build_redstone_socketcan'} = 1;
 	$context->{'build_can_odb2_monitor'} = 1;
 	$context->{'build_trip_stats'} = 1;
-	$context->{'build_can_seatbelt_monitor'} = 0;
+	$context->{'build_can_seatbelt_monitor'} = 1;
 	$context->{'build_FastTrac'} = 1;
 	$context->{'build_uboot'} = 1;
 	$context->{'build_bootstream'} = 1;
@@ -71,39 +71,36 @@ sub build_config(\% $)
 	$context->{'build_php_5_4_10'} = 0;
 	$context->{'build_gmp_5_0_5'} = 0;
 	$context->{'build_openswan_2_6_38'} = 0;
-	$context->{'build_ipsec_monitor'} = 0;
+	$context->{'build_ipsec_monitor'} = 1;
 	$context->{'build_avl_monitor'} = 1;
 	$context->{'build_feature_monitor'} = 1;
 	$context->{'build_telit_monitor'} = 1;
-	$context->{'build_can_dodge_seatbelt_monitor'} = 0;
-	$context->{'build_can_ford_seatbelt_monitor'} = 0;
-	$context->{'build_can_gm_seatbelt_monitor'} = 0;
+	$context->{'build_can_dodge_seatbelt_monitor'} = 1;
+	$context->{'build_can_ford_seatbelt_monitor'} = 1;
+	$context->{'build_can_gm_seatbelt_monitor'} = 1;
 	$context->{'build_ignition_monitor'} = 1;
 	$context->{'build_libpcap_1_3_0'} = 1;
 	$context->{'build_web_config_manager'} = 1;
 	$context->{'build_packetizer_lib'} = 1;
 	$context->{'build_packetizer_dash_socket'} = 0;
 	$context->{'build_packetizer_dash'} = 0;
-	$context->{'build_packetizer_calamps'} = 0;
+	$context->{'build_packetizer_calamps'} = 1;
 	$context->{'build_gps_socket_server'} = 1;
 	$context->{'build_i2c_gpio_monitor'} = 1;
 	$context->{'build_plc_serial_monitor'} = 1;
 	$context->{'build_wifi_monitor'} = 1;
 	$context->{'build_wifi_client_monitor'} = 1;
-	$context->{'build_iproute2_j1939'} = 0;
+	$context->{'build_iproute2_j1939'} = 1;
 	$context->{'build_expat_2_0_1'} = 1;
-	$context->{'build_redstone_socketcan_j1939'} = 0;
-	$context->{'build_can_j1939_monitor'} = 0;
+	$context->{'build_redstone_socketcan_j1939'} = 1;
+	$context->{'build_can_j1939_monitor'} = 1;
 	$context->{'build_skybase'} = 0;
-	$context->{'build_packetizer_iridium'} = 0;
+	$context->{'build_packetizer_iridium'} = 1;
 	$context->{'build_libmodbus_3_0_4'} = 1;
 	$context->{'build_modbus_monitor'} = 1;
 	$context->{'build_zigbee_monitor'} = 1;
 	$context->{'build_packetizer_cams'} = 1;
 	$context->{'build_iridium_monitor'} = 1;
-	$context->{'build_isc_lens'} = 0;
-	$context->{'build_packetizer_inet'} = 0;
-	$context->{'build_isc_modbus'} = 1;
 
 	# Custom RedStone Includes
 	my $include_dir = "$embedded_apps_dir/apps/include";
@@ -188,7 +185,6 @@ sub build_config(\% $)
 	my $packetizer_calamps_dir = "$embedded_apps_dir/apps/packetizer-calamps";
 	my $packetizer_iridium_dir = "$embedded_apps_dir/apps/packetizer-iridium";
 	my $packetizer_cams_dir = "$embedded_apps_dir/apps/packetizer-cams";
-	my $packetizer_inet_dir = "$embedded_apps_dir/apps/packetizer-inet";
 	my $gps_socket_server_dir = "$embedded_apps_dir/apps/gps-socket-server";
 	my $i2c_gpio_monitor_dir = "$embedded_apps_dir/apps/i2c-gpio-monitor";
 	my $plc_serial_monitor_dir = "$embedded_apps_dir/apps/plc-serial-monitor";
@@ -200,8 +196,6 @@ sub build_config(\% $)
 	my $modbus_monitor_dir = "$embedded_apps_dir/apps/modbus-monitor";
 	my $zigbee_monitor_dir = "$embedded_apps_dir/apps/zigbee-monitor";
 	my $iridium_monitor_dir = "$embedded_apps_dir/apps/iridium-monitor";
-	my $isc_lens_dir = "$embedded_apps_dir/apps/isc-lens";
-	my $isc_modbus_dir = "$embedded_apps_dir/apps/isc-modbus";
 
 	build_parallel_item(%$context, 'include', $include_dir);
 	build_parallel_item(%$context, 'gcc', $gcc_dir);
@@ -305,10 +299,6 @@ sub build_config(\% $)
 	build_parallel_item(%$context, 'skybase', $skybase_dir);
 	build_parallel_item(%$context, 'modbus-monitor', $modbus_monitor_dir);
 	build_parallel_item(%$context, 'zigbee-monitor', $zigbee_monitor_dir);
-	join_parallel_builds(%$context);
-	build_parallel_item(%$context, 'isc-lens', $isc_lens_dir);
-	build_parallel_item(%$context, 'isc-modbus', $isc_modbus_dir);
-	build_parallel_item(%$context, 'packetizer-inet', $packetizer_inet_dir);
 	join_parallel_builds(%$context);
 
 	$context->{'build_config'} = 1;
