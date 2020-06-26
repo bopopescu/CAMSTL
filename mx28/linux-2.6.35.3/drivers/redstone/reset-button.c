@@ -60,7 +60,7 @@ static int g_irq_num = 0;
 static DECLARE_WAIT_QUEUE_HEAD(g_q);
 static int g_dbg = 0;
 static struct file* g_file = 0;
-static int g_pin = MXS_PIN_ENCODE(1, 12);
+static int g_pin = MXS_PIN_ENCODE(2, 8);
 
 static struct timespec g_press_time;
 

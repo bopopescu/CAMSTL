@@ -68,18 +68,6 @@ static struct spi_board_info spi_board_info[] __initdata = {
 		.platform_data = &mx28_spi_flash_data,
 	},
 #endif
-#if 1
-#if defined(CONFIG_SPI_MXS) || defined(CONFIG_SPI_MXS_MODULE)
-	{
-		/* the modalias must be the same as spi device driver name */
-		.modalias = "spidev", /* Name of spi_driver for this device */
-		.max_speed_hz = 20000000,     /* max spi clock (SCK) speed in HZ */
-		.bus_num = 1, /* Framework bus number */
-		.chip_select = 0, /* Framework chip select. */
-		.mode = SPI_MODE_0,
-	},
-#endif
-#endif
 };
 
 static void spi_device_init(void)

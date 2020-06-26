@@ -157,18 +157,15 @@ static struct pin_desc mx28evk_fixed_pins[] =
 	 },
   // see mx28evk_gpmi_pins[] for GPMI definitions.
 	{
-		.name	= "RESET_BUTTON",
-		.id	= PINID_LCD_D12,
-		.pullup	= 1,
+		.name	= "SDIO_CMD",
+		.id	= PINID_SSP0_CMD,
 		GPIO_INPUT
 	},
-/*
 	{
 		.name	= "IridSats",  // Iridium sats in view
 		.id	= PINID_SSP0_DATA0,
 		GPIO_INPUT
 	 },
-	*/
 	{
 		.name	= "EN_PER_OUT",  // Enable Peripheral Power - active high
 		.id	= PINID_SSP0_DATA3,
@@ -466,67 +463,6 @@ static struct pin_desc mx28evk_fixed_pins[] =
 	// NOTE remaining pins in block (LCD_D00 to LCD_D06) are for boot loader - do not initialize or enable.
 
 	// FROM TruLink Combined schematics iMX28 Processor page Block U75D - in order of appearance on the page
-	//
-	// setup for lens
-	{
-		.name	= "ISC_SPI_CS",
-		.id	= PINID_SSP0_DATA1,
-		GPIO_OUTPUT
-			.data = 1,  // default to high output
-	},
-	{
-		.name	= "ISC_SPI_SCK",
-		.id	= PINID_SSP0_SCK,
-		.fun   = PIN_FUN1,
-		.strength = PAD_8MA,
-		.voltage = PAD_3_3V,
-		.drive = 1,
-	},
-	{
-		.name	= "ISC_SPI_MOSI",
-		.id	= PINID_SSP0_CMD,
-		.fun   = PIN_FUN1,
-		.strength = PAD_8MA,
-		.voltage = PAD_3_3V,
-		.drive = 1,
-	},
-	{
-		.name	= "ISC_SPI_MISO",
-		.id    = PINID_SSP0_DATA0,
-		.fun   = PIN_FUN1,
-		.strength = PAD_8MA,
-		.voltage = PAD_3_3V,
-		.drive = 1,
-	},
-	{
-		.name	= "ISC_nReset",
-		.id  = PINID_SAIF1_SDATA0,
-		GPIO_OUTPUT
-			.data = 1,  // default to high output
-	},
-	{
-		.name	= "ISC_nRequest",
-		.id	= PINID_SAIF0_BITCLK,
-		GPIO_OUTPUT
-			.data = 1,  // default to high output
-	},
-	{
-		.name	= "ISC_Grant",
-		.id	= PINID_SAIF0_LRCLK,
-		GPIO_INPUT
-	},
-	{
-		.name  = "ISC_nUrgent",
-		.id = PINID_SAIF0_SDATA0,
-		GPIO_OUTPUT
-			.data = 1,  // default to high output
-	},
-	{
-		.name  = "AUART2_Select",
-		.id = PINID_SPDIF,
-		GPIO_OUTPUT
-			.data = 1,  // default to high output
-	},
 };
 
 #if defined(CONFIG_FEC) || defined(CONFIG_FEC_MODULE)	|| defined(CONFIG_FEC_L2SWITCH)

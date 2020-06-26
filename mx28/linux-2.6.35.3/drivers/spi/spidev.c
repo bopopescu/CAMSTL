@@ -30,17 +30,11 @@
 #include <linux/errno.h>
 #include <linux/mutex.h>
 #include <linux/slab.h>
-#include <linux/interrupt.h>
-#include <linux/delay.h>
 
 #include <linux/spi/spi.h>
 #include <linux/spi/spidev.h>
 
 #include <asm/uaccess.h>
-#include <mach/gpio.h>
-#include <mach/pinctrl.h>
-#include <mach/../../../mach-mx28/mx28_pins.h>
-#include <mach/../../../mach-mx28/regs-pinctrl.h>
 
 
 /*
@@ -58,15 +52,7 @@
  */
 #define SPIDEV_MAJOR			153	/* assigned */
 #define N_SPI_MINORS			32	/* ... up to 256 */
-#define ISC_nREQUEST   (MXS_PIN_TO_GPIO(MXS_PIN_ENCODE(3, 22)))
-#define ISC_GRANT      (MXS_PIN_TO_GPIO(MXS_PIN_ENCODE(3, 21)))
-#define ISC_CS         (MXS_PIN_TO_GPIO(MXS_PIN_ENCODE(2, 1)))
 
-static atomic_t g_atomic_irq;
-static atomic_t* g_irq = &g_atomic_irq;
-static int g_irq_num = 0;
-
-DECLARE_WAIT_QUEUE_HEAD(g_spi_q);
 static DECLARE_BITMAP(minors, N_SPI_MINORS);
 
 
@@ -105,15 +91,6 @@ static unsigned bufsiz = 4096;
 module_param(bufsiz, uint, S_IRUGO);
 MODULE_PARM_DESC(bufsiz, "data bytes in biggest supported SPI message");
 
-static irqreturn_t irq_fn(int irq, void* dev_id)
-{
-	//printk(KERN_NOTICE "%s,%d:%s: irq=%d, dev_id=%p\n", __FILE__, __LINE__, __FUNCTION__, irq, dev_id);
-	atomic_set(g_irq, 1);
-	wake_up_interruptible(&g_spi_q);
-	return IRQ_HANDLED;
-}
-
-
 /*-------------------------------------------------------------------------*/
 
 /*
@@ -133,17 +110,6 @@ spidev_sync(struct spidev_data *spidev, struct spi_message *message)
 
 	message->complete = spidev_complete;
 	message->context = &done;
-	gpio_direction_output(ISC_nREQUEST, 0); // pull request low
-	wait_event_interruptible(g_spi_q, atomic_read(g_irq));
-
-	if(!atomic_read(g_irq))
-	{
-		printk(KERN_NOTICE "\x1b[1;44;37m%s,%d: Cancelled!\x1b[0m\n", __FILE__, __LINE__);
-		return 1;
-	}
-
-	atomic_set(g_irq, 0);
-	gpio_direction_output(ISC_CS, 0); // cs enable
 
 	spin_lock_irq(&spidev->spi_lock);
 	if (spidev->spi == NULL)
@@ -158,9 +124,6 @@ spidev_sync(struct spidev_data *spidev, struct spi_message *message)
 		if (status == 0)
 			status = message->actual_length;
 	}
-
-	gpio_direction_output(ISC_CS, 1); // cs disable
-	gpio_direction_output(ISC_nREQUEST, 1); // pull request low
 	return status;
 }
 
@@ -514,25 +477,6 @@ static int spidev_open(struct inode *inode, struct file *filp)
 	int			status = -ENXIO;
 
 	mutex_lock(&device_list_lock);
-	if(!g_irq_num)
-	{
-		const int irq = gpio_to_irq(ISC_GRANT);
-		const int ret = request_threaded_irq(irq, NULL, irq_fn, IRQF_TRIGGER_RISING, "lens", &spidev_open);
-
-		if(ret < 0)
-		{
-			mutex_unlock(&device_list_lock);
-			printk(KERN_ERR "%s,%d: request_irq() failed: %d\n", __FILE__, __LINE__, ret);
-			return ret;
-		}
-
-		g_irq_num = irq;
-	}
-	// ??? fix unbalanced irq issue in dmesg
-	//else
-	//{
-	//	enable_irq(g_irq_num);
-	//}
 
 	list_for_each_entry(spidev, &device_list, device_entry) {
 		if (spidev->devt == inode->i_rdev) {
@@ -710,8 +654,6 @@ static int __init spidev_init(void)
 	 * that will key udev/mdev to add/remove /dev nodes.  Last, register
 	 * the driver which manages those device numbers.
 	 */
-
-	atomic_set(g_irq, 0);
 	BUILD_BUG_ON(N_SPI_MINORS > 256);
 	status = register_chrdev(SPIDEV_MAJOR, "spi", &spidev_fops);
 	if (status < 0)
@@ -728,19 +670,12 @@ static int __init spidev_init(void)
 		class_destroy(spidev_class);
 		unregister_chrdev(SPIDEV_MAJOR, spidev_spi_driver.driver.name);
 	}
-	gpio_request(MXS_PIN_TO_GPIO(MXS_PIN_ENCODE(3, 22)), "lens");
-	gpio_export(MXS_PIN_TO_GPIO(MXS_PIN_ENCODE(3, 22)), true);
-	gpio_request(MXS_PIN_TO_GPIO(MXS_PIN_ENCODE(2, 1)), "lens");
-	gpio_export(MXS_PIN_TO_GPIO(MXS_PIN_ENCODE(2, 1)), true);
-
 	return status;
 }
 module_init(spidev_init);
 
 static void __exit spidev_exit(void)
 {
-	gpio_free( MXS_PIN_TO_GPIO(MXS_PIN_ENCODE(3, 22)));
-	gpio_free( MXS_PIN_TO_GPIO(MXS_PIN_ENCODE(2, 1)));
 	spi_unregister_driver(&spidev_spi_driver);
 	class_destroy(spidev_class);
 	unregister_chrdev(SPIDEV_MAJOR, spidev_spi_driver.driver.name);

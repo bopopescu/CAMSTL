@@ -663,25 +663,25 @@ static void mx28_init_mmc(void)
 
 #if defined(CONFIG_SPI_MXS) || defined(CONFIG_SPI_MXS_MODULE)
 static struct mxs_spi_platform_data spi_data = {
-	.clk = "ssp.0",
+	.clk = "ssp.2",
 	.slave_mode = 0,
 };
 static struct resource ssp2_resources[] = {
 	{
-		.start	= SSP0_PHYS_ADDR,
-		.end	= SSP0_PHYS_ADDR + 0x2000 - 1,
+		.start	= SSP2_PHYS_ADDR,
+		.end	= SSP2_PHYS_ADDR + 0x2000 - 1,
 		.flags	= IORESOURCE_MEM,
 	}, {
-		.start	= MXS_DMA_CHANNEL_AHB_APBH_SSP0,
-		.end	= MXS_DMA_CHANNEL_AHB_APBH_SSP0,
+		.start	= MXS_DMA_CHANNEL_AHB_APBH_SSP2,
+		.end	= MXS_DMA_CHANNEL_AHB_APBH_SSP2,
 		.flags	= IORESOURCE_DMA,
 	}, {
-		.start	= IRQ_SSP0_DMA,
-		.end	= IRQ_SSP0_DMA,
+		.start	= IRQ_SSP2_DMA,
+		.end	= IRQ_SSP2_DMA,
 		.flags	= IORESOURCE_IRQ,
 	}, {
-		.start	= IRQ_SSP0,
-		.end	= IRQ_SSP0,
+		.start	= IRQ_SSP2,
+		.end	= IRQ_SSP2,
 		.flags	= IORESOURCE_IRQ,
 	},
 };

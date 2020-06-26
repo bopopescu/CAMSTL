@@ -60,16 +60,6 @@ config REDSTONE_WIFITRAFFIC
 	default y
 	depends on REDSTONE_DRIVERS
 
-config REDSTONE_LENS
-	tristate "ISC Lens support"
-	default y
-	depends on REDSTONE_DRIVERS
-
-config REDSTONE_LENS_URGENT_INTERRUPT
-	tristate "ISC LENS urgent interrupt driver for TRULink devices"
-	default y
-	depends on REDSTONE_DRIVERS
-
 config REDSTONE_CAN_ON_TX_CONTROL
 	bool "Allow enabling/disabling of CAN transceiver"
 	default y

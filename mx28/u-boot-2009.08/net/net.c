@@ -546,6 +546,8 @@ printf("%s::%d", __FILE__, __LINE__);
 			(*x)();
 		}
 
+printf("%s::%d", __FILE__, __LINE__);
+
 		switch (NetState) {
 
 		case NETLOOP_RESTART:

@@ -27,6 +27,3 @@ obj-$(CONFIG_REDSTONE_RESET_BUTTON)	+=\
 
 obj-$(CONFIG_TRULINK_IRIDIUM_EMULATOR)	+=\
 	iridium-emulator.o
-
-obj-$(CONFIG_REDSTONE_LENS_URGENT_INTERRUPT) +=\
-	lens-urgent.o
