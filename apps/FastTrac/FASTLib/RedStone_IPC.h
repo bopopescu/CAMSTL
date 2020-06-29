@@ -54,11 +54,11 @@ struct REDSTONE_IPC_DATA
 	short m_wifiLEDStatus; // 0: OFF, 1: AP ON, 2: Client ON, 3: traffic
 	AWARE_MODEM_STATES m_ModemState;    // 0:NoComm, 1:No SIM found, 2:Sim, No carrier 3: carrier, no ppp 4:ppp established
 	AWARE_PPP_STATES m_pppState;      // 0:no ppp established, 1:ppp established (only set in connect-ppp)
-
+    bool m_isEthernetWorking; //ISCP-295
 public:
 	REDSTONE_IPC_DATA() : m_bIgnitionOn(false), m_RPM(0), m_Speed(0), m_SeatbeltBuckled(true), m_rssi(0), \
 				m_ObdLastUpdated(0), m_BatteryVoltageValid(false), m_GPIO(0),m_bSendingEmail(false), \
-													m_ModemState(AMS_NO_COMM), m_pppState(APS_UNCONNECTED) {}
+													m_ModemState(AMS_NO_COMM), m_pppState(APS_UNCONNECTED),m_isEthernetWorking(false) {}
 };
 
 class REDSTONE_IPC
@@ -137,7 +137,8 @@ public:
 
 	bool SendingEmail() { return ipc->m_bSendingEmail; }
 	void SendingEmail(bool val){ipc->m_bSendingEmail = val;}
-
+	bool isEthernetInternetWorking(void){ return ipc->m_isEthernetWorking; } //ISCP-295
+	void isEthernetInternetWorking(bool val){ipc->m_isEthernetWorking = val; }	
 	void initialize()
 	{
 		ipc->m_bIgnitionOn = false;
