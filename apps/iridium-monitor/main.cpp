@@ -139,27 +139,11 @@ int ac_status(AdminCommandContext& p_acc, int, char* p_argv[])
 	return 0;
 }
 
-//298
-int ac_response(AdminCommandContext& p_acc, int, char* p_argv[])
-{
-	char response[40];
-	//ats_logf(ATSLOG_INFO, "%s,%d:ac_response", __FILE__, __LINE__);
-
-	g_ird_sender.IridiumGetResponse((char *)response);
-	//ats_logf(ATSLOG_INFO, "%s,%d:ac_response Step 2", __FILE__, __LINE__);
-
-	send_cmd(p_acc.get_sockfd(), MSG_NOSIGNAL,"%s:response:%s\n\r", p_argv[0], response);
-	//ats_logf(ATSLOG_INFO, "%s,%d:ac_response Step 3", __FILE__, __LINE__);
-	return 0;
-}
-
 MyData::MyData(){
 	m_command.insert(AdminCommandPair("ready", ac_ready));
 	m_command.insert(AdminCommandPair("send", ac_send));
 	m_command.insert(AdminCommandPair("sendtdata", ac_sendtdata));
 	m_command.insert(AdminCommandPair("status", ac_status));
-	//298
-	m_command.insert(AdminCommandPair("response", ac_response));
 }
 
 static void* local_command_server(void* p)
@@ -215,7 +199,7 @@ static void* local_command_server(void* p)
 				continue;
 		}
 
-		if (strcmp(cmd.c_str(), "ready") == 0)
+		if (strcmp(cmd.c_str(), "ready") != 0)
 			ats_logf(ATSLOG_INFO, "%s,%d:%s: Command received: %s", __FILE__, __LINE__, __FUNCTION__, cmd.c_str());
 
 		cmd.clear();

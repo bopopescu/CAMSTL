@@ -82,7 +82,6 @@ public:
 	//
 	// Return: The empty string is returned on success, and an error message is returned otherwise.
 	const ats::String& Update(const ats::String& p_app, const ats::String& p_key, const ats::String& p_value);
-	const bool UpdateB(const ats::String& p_app, const ats::String& p_key, const ats::String& p_value);
 
 	// Description: Returns true if config value "p_key" exists in the database, and false is returned otherwise.
 	bool Exists(const ats::String& p_app, const ats::String& p_key);

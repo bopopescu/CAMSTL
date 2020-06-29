@@ -1,88 +1,152 @@
 #include <stdio.h>
-#include <string>
-#include <iostream>
-#include <sstream>
-//#include "InstrumentStatus.h"
-//#include "InstrumentIdentifyGeneral.h"
-//#include "InstrumentIdentifySensor.h"
-//#include "INET_IPC.h"
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+#include <pthread.h>
+#include <fcntl.h>
+#include <semaphore.h>
 
-//void TestInstrumentStatus();
-//void TestIdentifyGeneral();
-//void TestIdentifySensor();
-void TestReturnID();
-uint64_t StrToLL(std::string strVal);
+#include "ats-common.h"
+#include "socket_interface.h"
+#include "command_line_parser.h"
 
-//INET_IPC g_INetIPC;  // common data.
+#define IF_DEBUG(M) if(g_md.m_dbg >= (M))
 
-int main(int argc, char **argv)
+class MyData : public ats::CommonData
 {
-//	TestInstrumentStatus();
-//	TestIdentifyGeneral();
-//	TestIdentifySensor();
-	TestReturnID();
+public:
+
+	ClientSocket m_cs;
+	int m_src_fd;
+	int m_des_fd;
+	int m_dbg;
+
+	MyData()
+	{
+		m_dbg = 0;
+		m_src_fd = -1;
+		m_des_fd = -1;
+		init_ClientSocket(&m_cs);
+	}
+
+};
+
+MyData g_md;
+
+static void* recv_thread(void* p)
+{
+	MyData& md = *((MyData*)p);
+
+	for(;;)
+	{
+		IF_DEBUG(5) fprintf(stderr, "Recving from socket\n");
+
+		char buf[8192];
+		const ssize_t nread = recv(md.m_cs.m_fd, buf, sizeof(buf), 0);
+
+		if(nread <= 0)
+		{
+			IF_DEBUG(5) fprintf(stderr, "Failed to recv from socket\n");
+			break;
+		}
+
+		IF_DEBUG(5) fprintf(stderr, "Writing %d to destination\n", int(nread));
+		write(md.m_des_fd, buf, size_t(nread));
+	}
+
 	return 0;
 }
 
-/*
-void TestInstrumentStatus()
+int main(int argc, char* argv[])
 {
-	const unsigned char msg[] = {0x24, 0x24, 0x00, 0x0c, 0x61, 0xbc, 0x9a, 0x2a, 0x07, 0x0f, 0x01, 0x21, 0x00, 0xff, 0x37, 0x23, 0x23};
-	Lens lens;
-	InstrumentStatus is(&lens);
-	
-	is.Decode(msg); 
-	//std::string mac = is.GetMAC().toHex();
-	return;
-}
 
-void TestIdentifyGeneral()
-{
-	const unsigned char msg[] = {0x24, 0x24, 0xa2, 0x4b, 0x00, 0x1c, 0x2c, 0x1b, 0x26, 0x61, 0xbc, 0x9a, 0x01, 0x02, 0x16, 0x31, 0x36, 0x31, 0x31, 0x33, 0x36, 0x30, 0x2d, 0x30, 0x30, 0x34, 0x20, 0x20, 0x20, 0x20, 0x20, 0x13, 0x02, 0x01, 0x00, 0x01, 0x13, 0x11, 0x02, 0x05, 0x03, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x30, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x81, 0x02, 0x6f, 0x23, 0x23};
-	InstrumentIdentifyGeneral idg;
+	if(argc < 4)
+	{
+		fprintf(stderr, "usage: %s <src> <des> <unix domain socket>\n", argv[0]);
+		return 1;
+	}
 
-	idg.Decode(msg);
-}
+	const bool uc = !strcmp("uc", argv[0]);
 
-void TestIdentifySensor()
-{
-	const unsigned char msg[] = {0x24, 0x24, 0xa3, 
-0x38, 0x61, 0xbc, 0x9a, 0x34, 0x08, 0x04, 0x05, 0x14, 0x22, 
-0x11, 0x00, 0xeb, 0x00, 0xc3, 0x00, 0x00, 0x00, 0x00, 0x18, 
-0x1a, 0x33, 0x00, 0x00, 0x14, 0x00, 0x0a, 0x00, 0x00, 0x00, 
-0x00, 0x24, 0x01, 0x11, 0x00, 0x00, 0x46, 0x00, 0x23, 0x00, 
-0x23, 0x00, 0xc8, 0x34, 0x02, 0x11, 0x11, 0x00, 0xc8, 0x00, 
-0x64, 0x00, 0x64, 0x00, 0x96, 0xc5, 
-0x23, 0x23};
-//	const unsigned char msg[] = {0x24, 0x24, 0xa3, 0x02, 0x02, 0x23, 0x23};
-/*
-0x24, 0x24, 0xa3, 0x38, 0x61, 0xbc, 0x9a, 0x34, 0x08, 0x04, 
-0x05, 0x14, 0x22, 0x11, 0x00, 0xeb, 0x00, 0xc3, 0x00, 0x00, 
-0x00, 0x00, 0x18, 0x1a, 0x33, 0x00, 0x00, 0x14, 0x00, 0x0a, 
-0x00, 0x00, 0x00, 0x00, 0x24, 0x01, 0x11, 0x00, 0x00, 0x46, 
-0x00, 0x23, 0x00, 0x23, 0x00, 0xc8, 0x34, 0x02, 0x11, 0x11, 
-0x00, 0xc8, 0x00, 0x64, 0x00, 0x64, 0x00, 0x96, 0xc5, 0x23, 
-0x23, 0x23
-*/
-/*
-	InstrumentIdentifySensor idg;
+	MyData& md = g_md;
+	md.set_from_args(argc - 3, argv + 3);
+	md.m_dbg = md.get_int("debug");
 
-	idg.Decode(msg);
-}
+	ClientSocket& cs = md.m_cs;
+	init_ClientSocket(&cs);
 
-*/
-void TestReturnID()
-{
-	std::string strID = "3000019778527";
-	uint64_t idVal;
-	idVal = StrToLL(strID);
-	printf("strID %s  idVal %llu\n", strID.c_str(), idVal);
-}
+	const char* src = argv[1];
+	const char* des = argv[2];
+	const char* name = argv[3];
 
-uint64_t StrToLL(std::string strVal)
-{
-	std::stringstream sstr(strVal);
-	uint64_t val;
-	sstr >> val;
-	return val;
+
+	if(!strcmp("-", src))
+	{
+		md.m_src_fd = STDIN_FILENO;
+	}
+	else
+	{
+
+		if((md.m_src_fd = open(src, O_RDONLY)) < 0)
+		{
+			fprintf(stderr, "Could not open \"%s\" for reading: %d: %s\n", src, errno, strerror(errno));
+			return 1;
+		}
+
+	}
+
+	if(!strcmp("-", des))
+	{
+		md.m_des_fd = STDOUT_FILENO;
+	}
+	else
+	{
+
+		if((md.m_des_fd = open(des, O_APPEND | O_WRONLY)) < 0)
+		{
+			fprintf(stderr, "Could not open \"%s\" for append: %d: %s\n", des, errno, strerror(errno));
+		}
+
+	}
+
+	const int ret = uc ? connect_unix_domain_client(&cs, name) : connect_redstone_ud_client(&cs, name);
+
+	if(ret < 0)
+	{
+		fprintf(stderr, "Failed to connect to socket: %d\n", ret);
+		return 1;
+	}
+
+	pthread_t thread;
+	pthread_create(&thread, 0, recv_thread, &md);
+
+	for(;;)
+	{
+		IF_DEBUG(5) fprintf(stderr, "reading from source\n");
+		char buf[8192];
+		const ssize_t nread = read(md.m_src_fd, buf, sizeof(buf));
+
+		if(nread <= 0)
+		{
+			IF_DEBUG(5) fprintf(stderr, "Failed to read from src: %d, %s\n", errno, strerror(errno));
+			break;
+		}
+
+		IF_DEBUG(5) fprintf(stderr, "writing %d to socket\n", int(nread));
+		const ssize_t nwrite = send(cs.m_fd, buf, nread, MSG_NOSIGNAL);
+
+		if(nwrite <= 0)
+		{
+			IF_DEBUG(5) fprintf(stderr, "Failed to write to socket\n");
+			break;
+		}
+
+	}
+
+	IF_DEBUG(5) fprintf(stderr, "Waiting to joing thread\n");
+	pthread_join(thread, 0);
+	IF_DEBUG(5) fprintf(stderr, "Thread joined\n");
+	return 0;
 }

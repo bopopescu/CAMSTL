@@ -32,7 +32,6 @@ void  delete_trailing_blanks(char *string);
 void  delete_leading_blanks(char *string);
 void copy_file(const char *from, const char *to);
 bool FileExists(const char *fname);
-bool IsInternetAvailable(); // checks that internet connection actually exists by doing a ping to google.
 
 #include "fragment.h"
 #include "angle.h"

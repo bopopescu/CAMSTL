@@ -149,8 +149,6 @@ const ats::String MessageDatabase::m_create_message_type_table(
 	"INSERT INTO message_types VALUES(53,'seatbelt_on',53,53);"
 	"INSERT INTO message_types VALUES(54,'seatbelt_off',54,54);"
 	"INSERT INTO message_types VALUES(110,'critt_batt',110,110);"
-	"INSERT INTO message_types VALUES(253,'inet_error',253,253);"
-	"INSERT INTO message_types VALUES(254,'lens_user_msg',254,254);"
 	"INSERT INTO message_types VALUES(256,'calamp_user_msg',256,256);"
 	"COMMIT;"
 	);

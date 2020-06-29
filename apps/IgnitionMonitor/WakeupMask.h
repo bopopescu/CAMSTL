@@ -33,7 +33,7 @@ public:
 		m_WakeupVoltage = (double)m_ConfigDB.GetInt("wakeup", "WakeupVoltage", (int)(m_WakeupVoltage * 1000)) / 1000.0;
 		m_ShutdownVoltage = (double)m_ConfigDB.GetInt("wakeup", "ShutdownVoltage", (int)(m_ShutdownVoltage * 1000)) / 1000.0;
 		ParseMask();
-		Save(); //ISCP-296: Keep Ignition On option always ON. 
+		Save(); //ISCP-296?: Keep Ignition On option always ON. 
 	}
 
 	

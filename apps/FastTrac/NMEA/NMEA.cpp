@@ -64,9 +64,10 @@ NMEA::NMEA()
 	CHECKSUM cs;
 	cs.add_checksum(m_IMEIString);
 
+//<non-isc>
 	m_isValid = false;
 	m_gps_quality = 0;
-
+//</non-isc>
 	// output the current config to the log file for debugging purposes.
 	ats_logf(ATSLOG_ERROR, "Parms: Logging %s", m_bLogging ? "On": "Off");
 	ats_logf(ATSLOG_ERROR, "			  GPS redirect %s", m_sendGPS ? "On": "Off");
@@ -565,7 +566,7 @@ short NMEA::DecodeGGA
 		m_Err = 10;
 		return NMEA_BAD_NMEA;
 	}
-
+//<non-isc>
 	if (strlen(pt[6]))
 	{
 		m_gps_quality = (short)atoi(pt[6]);
@@ -578,7 +579,7 @@ short NMEA::DecodeGGA
 		else
 			m_isValid = true;
 	}
-
+//</non-isc>
 	if (strlen(pt[2]) && strlen(pt[3]) && strlen(pt[4]) && strlen(pt[5]))
 	{
 		if ((dec_place = strchr(pt[2], '.')) == NULL || (short)(dec_place - pt[2]) != 4)
@@ -801,7 +802,7 @@ short NMEA::DecodeRMC
 	{
 		ats_logf(ATSLOG_DEBUG, "RMC decode error: %d", m_Err);
 	}
-
+//<non-isc>
 ats_logf(ATSLOG_DEBUG, "GPS RMC 8\n");
 	 if(
 		( m_Data.year < theTime.GetYear() ) 	||
@@ -825,6 +826,7 @@ ats_logf(ATSLOG_DEBUG, "GPS RMC 8\n");
   		}
   		ats_logf(ATSLOG_DEBUG, "GPS_DATE_TIME:%d:%d:%d %d:%d\n",m_Data.year,m_Data.month,m_Data.day,m_Data.hour,m_Data.minute);
 		ats_logf(ATSLOG_DEBUG, "CURRENT_DATE_TIME:%d:%d:%d %d:%d\n",theTime.GetYear(),theTime.GetMonth(),theTime.GetDay(),theTime.GetHour(),theTime.GetMinute());
+//</non-isc>
 	return NMEA_RMC_OK;
 }
 

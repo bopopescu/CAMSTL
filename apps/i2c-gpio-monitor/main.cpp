@@ -627,9 +627,6 @@ void OpenGlobalLogger(ATSLogger &log, char * command_name)
 //	7. Wait forever for commands
 int main(int argc, char *argv[])
 {
-	AFS_Timer t;
-	std::string user_data;
-	
 	OpenGlobalLogger(g_log, argv[0]);
 
 	ats_logf(ATSLOG_DEBUG, "-----------------I2C-GPIO-Monitor started");
@@ -756,12 +753,6 @@ int main(int argc, char *argv[])
 		if(!(g_irq_file = fopen(g_irq_fname, "r")))
 		{
 			ats_logf(ATSLOG_ERROR, "Failed to open IRQ monitor file %s", g_irq_fname);
-			//ISCP-163
-			t.SetTime();
-			user_data = "1017," + t.GetTimestampWithOS() + ", TGX i2C Error";
-			ats_logf(ATSLOG_DEBUG, "TGX I2C Error:%s\n",user_data.c_str());
-			user_data = ats::to_hex(user_data);
-			send_redstone_ud_msg("message-assembler", 0, "msg inet_error msg_priority=9 usr_msg_data=%s\r", user_data.c_str());
 			return 1;
 		}
 

@@ -38,40 +38,22 @@ void IridiumUtil::init()
 	connect();
 }
 
-//298
-bool IridiumUtil::getResponse(std::string &data )
-{
-	const int ret = send_cmd(m_cs->m_fd, MSG_NOSIGNAL, "response\r");
-	if(ret<0)
-	{
-                reconnect();
-		return false;	
-	}
-	ats::SocketInterfaceResponse ir(m_cs->m_fd);
-	data = ir.get();
-	return true;
-}
-
-
 bool IridiumUtil::isNetworkAvailable()
 {
 	const int ret = send_cmd(m_cs->m_fd, MSG_NOSIGNAL, "ready\r");
-
 	if(ret < 0)
 	{
 		reconnect();
-		//ats_logf(ATSLOG_DEBUG, "Could not send command 'ready'. Reconnecting..");
+		ats_logf(ATSLOG_DEBUG, "Could not send command 'ready'. Reconnecting..");
 		return false;
 	}
 
 	ats::SocketInterfaceResponse ir(m_cs->m_fd);
 	ats::String resp = ir.get();
-
 	if((resp.find("yes") != std::string::npos) && (resp.find("ready") != std::string::npos))
 	{
 		return true;
 	}
-
 	return false;
 }
 
@@ -98,7 +80,6 @@ bool IridiumUtil::sendMessageWDataLimit(ats::String hexData)
 	}
 
 	int code;
-
 	if(getResponseCode(code))
 	{
 		return isMessageSent(code);

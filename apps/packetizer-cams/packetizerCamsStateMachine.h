@@ -89,6 +89,7 @@ private:
 	static void* priorityOneCellSend(void*);
 	static void* priorityOneIridiumSend(void*);
 	void SendFakeIridium(std::vector<char> data);
+	void CleanupDB();
 
 	PacketizerCamsDB *m_dbreader;
 	PacketizerCellSender *m_cell_sender;
@@ -99,6 +100,7 @@ private:
 	uint32_t sequence_num;
 	std::map<int,int> m_messagetypes;
 	AFS_Timer m_keepAliveTimer;
+	AFS_Timer m_CheckDBSizeTimer;
 	uint32_t m_CompressedSeqNum;
 
 	//state machine variables
@@ -120,6 +122,8 @@ private:
 	std::vector<char> m_state15_iridium_data;
 	ats::String m_ForceIridium; // Can be Never, Off, On.  If Never a restart will be needed to switch modes.  If 'Off' or 'On' you can actively change db-config value and the unit will switch while running
 	bool m_FakeIridium; // Send Iridium email directly via cell network
+	int m_RemoveAfterDays;  // remove records in db after this number of days
+	int m_MaxDBRecords;     // remove oldest records if db exceeds this size.
 
 	REDSTONE_IPC m_redstone;
 	int m_sequence_num;

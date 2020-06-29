@@ -25,7 +25,7 @@ public:
 
   void SetTime()
   {
-    clock_gettime(CLOCK_REALTIME, &m_time);
+    clock_gettime(CLOCK_REALTIME, &m_time); //<non-isc>
   };
 
   typedef long long LL;
@@ -35,7 +35,7 @@ public:
   LL ElapsedTime() const
   {
 		struct timespec t;
-		clock_gettime(CLOCK_REALTIME, &t);
+		clock_gettime(CLOCK_REALTIME, &t); //<non-isc>
 		const LL &f = ((LL) t.tv_sec) * ((LL)1000000000) + ((LL)t.tv_nsec);
 		const LL &i = ((LL) m_time.tv_sec) * ((LL)1000000000) + ((LL)m_time.tv_nsec);
 		return f - i;
@@ -66,33 +66,6 @@ public:
 	  SetTime();
 	  usleep(int(msDelayTime) * 1000);
   }
-	//------------------------------------------------------------------------------
-	std::string GetTimestamp()
-	{
-		char s[32];  // should be enough space.
-		s[0] = '\0';
-		struct tm *tm;
-		tm = localtime(&(m_time.tv_sec));
-		if (tm != NULL)
-		{
-			strftime(s, 31, "%Y-%m-%dT%H:%M:%S", tm);
-		}
-
-		return std::string(s);
-	}
-	std::string GetTimestampWithOS()
-	{
-		char s[32];  // should be enough space.
-		s[0] = '\0';
-		struct tm *tm;
-		tm = localtime(&(m_time.tv_sec));
-		if (tm != NULL)
-		{
-			strftime(s, 31, "%Y-%m-%dT%H:%M:%S.000-0000", tm);
-		}
-
-		return std::string(s);
-	}
 };
 
 

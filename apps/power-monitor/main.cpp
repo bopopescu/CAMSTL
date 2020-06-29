@@ -439,56 +439,56 @@ static void* reset_button_task(void* p)
 			{
 				action = c;
 		 		count = 0;
-//				ats::write_file("/dev/set-gpio", "TU");  // Power LED to orange.
+				ats::write_file("/dev/set-gpio", "TU");  // Power LED to orange.
 				ats_logf(ATSLOG_DEBUG, "%s,%d: 1 received - reset-button pressed", __FILE__, __LINE__);
 			}
 			else if('2' == c)
 			{	
 				action = c;
 		 		count = 0;
-//				send_redstone_ud_msg("i2c-gpio-monitor", 0, "blink add name=reset app=/usr/redstone/reboot-blink.so\r");
+				send_redstone_ud_msg("i2c-gpio-monitor", 0, "blink add name=reset app=/usr/redstone/reboot-blink.so\r");
 				ats_logf(ATSLOG_DEBUG, "%s,%d: reset-button - 2 received", __FILE__, __LINE__);
 			}
 			else if('3' == c)
 			{
 				action = c;
 		 		count = 0;
-//				send_redstone_ud_msg("i2c-gpio-monitor", 0, "blink del reset\r");
+				send_redstone_ud_msg("i2c-gpio-monitor", 0, "blink del reset\r");
 				usleep(250 * 1000);
-//				send_redstone_ud_msg("i2c-gpio-monitor", 0, "blink add name=reset app=/usr/redstone/factory-blink.so\r");
+				send_redstone_ud_msg("i2c-gpio-monitor", 0, "blink add name=reset app=/usr/redstone/factory-blink.so\r");
 				ats_logf(ATSLOG_DEBUG, "%s,%d: reset-button - 3 received", __FILE__, __LINE__);
 			}
 			else if('4' == c)
 			{
 				action = c;
 		 		count = 0;
-//				send_redstone_ud_msg("i2c-gpio-monitor", 0, "blink del reset\r");
+				send_redstone_ud_msg("i2c-gpio-monitor", 0, "blink del reset\r");
 				usleep(250 * 1000);
-//				send_redstone_ud_msg("i2c-gpio-monitor", 0, "blink add name=reset app=/usr/redstone/reset-blink.so \r");
+				send_redstone_ud_msg("i2c-gpio-monitor", 0, "blink add name=reset app=/usr/redstone/reset-blink.so \r");
 				ats_logf(ATSLOG_ERROR, "%s,%d: reset-button - 4 received", __FILE__, __LINE__);
 			}
 			else if('0' == c)  // released the button - do the action
 			{
-//				ats::write_file("/dev/set-gpio", "Tu");  // Power LED to orange.
+				ats::write_file("/dev/set-gpio", "Tu");  // Power LED to orange.
 				ats_logf(ATSLOG_ERROR, "%s,%d: reset-button - 0 received", __FILE__, __LINE__);
 
 				if('2' == action)  //reboot
 				{
 					ats::system("echo \"`date|tr -d '\\n'`: Reset button requested reboot\" >> /tmp/logdir/reset-button.txt");
-//					ats::system("reboot");
+					ats::system("reboot");
 				}
 				else if('3' == action)
 				{
 					ats::system("echo \"`date|tr -d '\\n'`: Reset button requested factory restore\" >> /tmp/logdir/reset-button.txt");
-//					ats::system("set_env fail_cnt 0xff;set_env fail_start yes");
-//					ats::system("reboot");
+					ats::system("set_env fail_cnt 0xff;set_env fail_start yes");
+					ats::system("reboot");
 				}
 				else if('4' == action)
 				{
 					ats::system("echo \"`date|tr -d '\\n'`: Reset button requested full restore\" >> /tmp/logdir/reset-button.txt");
-//					ats::system("db-config unset");
-//					ats::system("set_env fail_cnt 0xff;set_env fail_start yes");
-//					ats::system("reboot");
+					ats::system("db-config unset");
+					ats::system("set_env fail_cnt 0xff;set_env fail_start yes");
+					ats::system("reboot");
 				}
 				action = '\0';
 			}

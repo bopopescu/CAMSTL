@@ -88,7 +88,7 @@ public:
 		jTime.get_dmy(day, month, year);
 	}
 
-	void SetTimeFromSystem(void)
+	void SetTimeFromSystem(void) //<non-isc>, sync time from gps
 	{
 		J2K theTime;
 
@@ -99,7 +99,7 @@ public:
 		hour = theTime.GetHour();
 		minute = theTime.GetMinute();
 		seconds = theTime.GetSecond();
-	}
+	}//</non-isc>
 //-----------------------------------------------------------------------
 // isValid - true if time is valid and Lat and Lon are both non-zero
 //

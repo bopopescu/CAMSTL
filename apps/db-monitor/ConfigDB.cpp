@@ -1,4 +1,5 @@
 #include <sstream>
+
 #include <sys/time.h>
 
 #include "ConfigDB.h"
@@ -76,21 +77,6 @@ const ats::String& ConfigDB::Update(const ats::String& p_app, const ats::String&
 	m_error.clear();
 	return m_error;
 }
-
-const bool ConfigDB::UpdateB(const ats::String& p_app, const ats::String& p_key, const ats::String& p_value)
-{
-	const ats::String& value = Get(p_app, p_key);
-
-	if(value != p_value)
-	{
-		Set(p_app, p_key, p_value);
-		return true;
-	}
-
-	m_error.clear();
-	return false;
-}
-
 
 const ats::String& ConfigDB::ClearAll()
 {

@@ -17,8 +17,7 @@ public:
 	bool sendMessageWDataLimit(std::vector<char> data);
 	bool sendMessage(std::vector<unsigned char> data);
 	bool sendMessage(std::vector<char> data);
-//298
-	bool getResponse(std::string &data);
+
 	bool isNetworkAvailable();
 
 	bool isMessageSent(int resp)

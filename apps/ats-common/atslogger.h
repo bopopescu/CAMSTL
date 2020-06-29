@@ -12,7 +12,7 @@
 #define ATSLOG_ERROR (ATSLOG(LOG_LEVEL_ERROR))
 #define ATSLOG_DEBUG (ATSLOG(LOG_LEVEL_DEBUG))
 #define ATSLOG_INFO  (ATSLOG(LOG_LEVEL_INFO))
-#define ATS_TRACE ats_logf(ATSLOG_INFO, "%s,%d: %s", __FILE__, __LINE__, __FUNCTION__);
+#define ATS_TRACE ats_logf(ATSLOG_INFO, "%s,%d: %s", __FILE__, __LINE__, __FUNCTION__); <//non-isc>
 
 
 // Description: Message logging helper class.

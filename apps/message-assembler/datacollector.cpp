@@ -1,5 +1,5 @@
-//#include <QFile>
-//#include <QList>
+#include <QFile>
+#include <QList>
 
 #include <math.h>
 #include <errno.h>
@@ -93,8 +93,6 @@ void DataCollector::init_message_names()
 	TMP_MSG(TRAK_SEATBELT_ON, "seatbelt_on");
 	TMP_MSG(TRAK_SEATBELT_OFF, "seatbelt_off");
 	TMP_MSG(TRAK_CALAMP_USER_MSG, "calamp_user_msg");
-	TMP_MSG(TRAK_INET_ERROR, "inet_error");
-	TMP_MSG(TRAK_INET_MSG, "inet_msg");
 	TMP_MSG(TRAK_LOW_BATTERY_MSG, "low_batt");
 	TMP_MSG(TRAK_CRITICAL_BATTERY_MSG, "crit_batt");
 	#undef TMP_MSG
@@ -174,8 +172,6 @@ void DataCollector::load_priority_table()
 	TMP_ADD_PRIORITY( TRAK_J1939_FAULT_MSG, g_default_priority);
 	TMP_ADD_PRIORITY( TRAK_J1939_STATUS2_MSG, g_default_priority);
 	TMP_ADD_PRIORITY( TRAK_CALAMP_USER_MSG, g_default_priority);
-	TMP_ADD_PRIORITY( TRAK_INET_ERROR, 9);
-	TMP_ADD_PRIORITY( TRAK_INET_MSG, g_default_priority);
 	TMP_ADD_PRIORITY( TRAK_LOW_BATTERY_MSG, 9);
 	TMP_ADD_PRIORITY( TRAK_CRITICAL_BATTERY_MSG, 2);
 	#undef TMP_ADD_PRIORITY
@@ -202,7 +198,6 @@ void DataCollector::writeUnlock()
 
 void DataCollector::initSeatbeltState()
 {
-	/*
 	ClientSocket cs;
 	init_ClientSocket(&cs);
 	connect_client(&cs, "127.0.0.1", 41204);
@@ -229,7 +224,6 @@ void DataCollector::initSeatbeltState()
 	m_seatbelt_buckled = (atol(ss.c_str()) == 1)? true: false;
 
 	close_ClientSocket(&cs);
-*/
 }
 
 

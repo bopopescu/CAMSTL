@@ -156,7 +156,7 @@ unsigned short KMLBufferedFile::Write(const char *buffer, const short bufSize)
   AFS_Timer theTime;
   theTime.SetTime();
 
-  char cpBuf[512];
+  char cpBuf[512]; //<non-isc> buffer size increased from 256 to 512
   sprintf(cpBuf, "cp %s /media/card/FASTTrack/GPStmp.kml", m_Name);
   system(cpBuf);
 

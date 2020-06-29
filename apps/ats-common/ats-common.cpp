@@ -1119,6 +1119,7 @@ String ats::to_hex(const String& p_s)
 	return str;
 }
 
+//<non-ISC>
 // this is for a char array that may contain 0x00 values
 String ats::to_hex(const char *data, const int len)
 {
@@ -1133,6 +1134,7 @@ String ats::to_hex(const char *data, const int len)
 
 	return s;
 }
+//</non-ISC>
 
 const char ats::g_hextable[128] =
 {

@@ -70,10 +70,6 @@ private:
 
 public:
 	static bool bTxInProgress; //<ISCP-238>
-// 298	
-	char m_MessageRecieved[40];
-	
-// 298
 	static ats::StringList m_ResponseBuf;  //array of responses excluding the ones watched by the reader thread
 	std::vector<char> m_MTMessageBuf;  // Binary byte array for storing MT message
 
@@ -81,18 +77,12 @@ public:
 	virtual ~IRIDIUM();
 
 	void init();
-	//298
-	//void GetResponse(std::vector< char> &p_msgBuf);	
-	//void ProcessIridiumResponse(std::vector<char>&  iridiumResponse);
-	void GetResponse(char * p_msgBuf);	
-	void ProcessIridiumResponse(std::string iridiumResponse);
 	
-	//298
 	bool PrepareToSendMessage(char *msg, short len);
 	int SendMessage();
 	bool ClearMessageBuffer();
 
-	bool IsNetworkAvailable(){return (m_bNetworkAvailable && (m_rssi > 2));}
+	bool IsNetworkAvailable(){return (m_bNetworkAvailable && (m_rssi > 0));}
 	int ManualNetworkRegistration();  //Returns the status code for +SBDREG command
 	bool WaitForResponse(const ats::String buf, const char *expected);
 	bool SendSBD(const char *buf, short len);

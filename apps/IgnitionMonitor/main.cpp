@@ -52,7 +52,7 @@ int main(int argc, char **argv)
 	struct timespec ts;
 	db_monitor::ConfigDB db;
 	const int ignitionOBDTimeoutSec = 30; 
-	const int keepAwakeSeconds = 60 * db.GetInt("RedStone", "KeepAwakeMinutes", 60); 
+	const int keepAwakeSeconds = 60 * db.GetInt("RedStone", "KeepAwakeMinutes", 60); //<ISCP-296?>
 
 	REDSTONE_IPC redStoneData;
 	NMEA_Client nmea;
@@ -86,13 +86,13 @@ int main(int argc, char **argv)
 
 	send_cmd(g_cs_powermonitor.m_fd, MSG_NOSIGNAL, "PowerMonitorStateMachine start\r");
 	bool bIgnitionOn;
-	// 292
-	bool IgnitionShutdown;
+
+	bool IgnitionShutdown; //<non-isc> ISCP-292
 	int nValidVolts = 0, nInvalidVolts = 0;
 
 	bIgnitionOn = false;
-	//292	
-	IgnitionShutdown = false;
+	
+	IgnitionShutdown = false; //<non-isc> ISCP-292
 	redStoneData.IgnitionOn(false);
 	ats_logf(&g_log, "Current Ignition Status now %s", redStoneData.IgnitionOn() ? "On" : "Off");
 	int inp1Accum = 0;
@@ -101,7 +101,7 @@ int main(int argc, char **argv)
 	{
 		strReason = "";
 		bIgnitionOn = false;
-		IgnitionShutdown = false;
+		IgnitionShutdown = false; //<non-isc> ISCP-292
 
 		if (wakeupMask.Can())
 		{
@@ -133,7 +133,7 @@ int main(int argc, char **argv)
 		{
 			strReason += "IgnitionInput ";
 			bIgnitionOn = true;
-			// ISCP-292
+			// <non-isc>ISCP-292
 			IgnitionShutdown = true;
 		}
 
@@ -173,7 +173,7 @@ int main(int argc, char **argv)
 			redStoneData.IgnitionOn(false);
 		}
 
-		// 292 
+		// <non-isc> ISCP-292 
 		if (IgnitionShutdown && redStoneData.IgnitionShutdown() == false)	// turning on
 		{
 			redStoneData.IgnitionShutdown(true);
@@ -181,7 +181,7 @@ int main(int argc, char **argv)
 		if (!IgnitionShutdown && redStoneData.IgnitionShutdown() == true)	// turning off
 		{
 			redStoneData.IgnitionShutdown(false);
-		}
+		}// </non-isc>
 
 		usleep(100000);
 	}

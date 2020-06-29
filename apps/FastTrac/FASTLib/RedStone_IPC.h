@@ -54,16 +54,11 @@ struct REDSTONE_IPC_DATA
 	short m_wifiLEDStatus; // 0: OFF, 1: AP ON, 2: Client ON, 3: traffic
 	AWARE_MODEM_STATES m_ModemState;    // 0:NoComm, 1:No SIM found, 2:Sim, No carrier 3: carrier, no ppp 4:ppp established
 	AWARE_PPP_STATES m_pppState;      // 0:no ppp established, 1:ppp established (only set in connect-ppp)
-	time_t m_firmUpdatetime; //ISCP-209
-	bool m_isNewFirmAvailable; //ISCP-209
-	bool m_isEthernetWorking; //ISCP-295
-	bool m_isInstrumentShuttingDown;//ISC-162
-	bool m_isShutDownMessageSent;//ISC-162
+
 public:
 	REDSTONE_IPC_DATA() : m_bIgnitionOn(false), m_RPM(0), m_Speed(0), m_SeatbeltBuckled(true), m_rssi(0), \
 				m_ObdLastUpdated(0), m_BatteryVoltageValid(false), m_GPIO(0),m_bSendingEmail(false), \
-				m_ModemState(AMS_NO_COMM), m_pppState(APS_UNCONNECTED),m_firmUpdatetime(10000), \
-				m_isNewFirmAvailable(false),m_isEthernetWorking(false),m_isInstrumentShuttingDown(false), m_isShutDownMessageSent(false){}
+													m_ModemState(AMS_NO_COMM), m_pppState(APS_UNCONNECTED) {}
 };
 
 class REDSTONE_IPC
@@ -142,23 +137,6 @@ public:
 
 	bool SendingEmail() { return ipc->m_bSendingEmail; }
 	void SendingEmail(bool val){ipc->m_bSendingEmail = val;}
-
-	time_t GetFirmwareUpdateTime(void) { return ipc->m_firmUpdatetime; }
-	void SetFirmwareUpdateTime(time_t tm) { ipc->m_firmUpdatetime = tm; }
-	
-	bool GetFirmwareUpdateStatus(void){ return ipc->m_isNewFirmAvailable; }
-	void SetFirmwareUpdateStatus(bool val){ipc->m_isNewFirmAvailable = val; }	
-    
-    bool GetInstrumentShutdownStatus(void){ return ipc->m_isInstrumentShuttingDown; }//ISC-162
-	void SetInstrumentShutdownStatus(bool val){ipc->m_isInstrumentShuttingDown = val; }
-
-	bool GetInstrumentShutdownMessageStatus(void){ return ipc->m_isShutDownMessageSent; }
-	void SetInstrumentShutdownMessageStatus(bool val){ipc->m_isShutDownMessageSent = val; }
-
-	
-        bool isEthernetInternetWorking(void){ return ipc->m_isEthernetWorking; } //ISCP-295
-        void isEthernetInternetWorking(bool val){ipc->m_isEthernetWorking = val; }	
-
 
 	void initialize()
 	{

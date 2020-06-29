@@ -1,5 +1,6 @@
 #include "atslogger.h"
 #include "messagedatabase.h"
+#include <boost/format.hpp>
 
 
 #include "packetizerCamsDB.h"
@@ -266,3 +267,28 @@ int PacketizerCamsDB::dbquery_SelectPriorityOneMessage()
 	ats_logf(ATSLOG_INFO, "%s: Found High Priority Event - Record %ld", __PRETTY_FUNCTION__, strtol(row[row.size()-1].c_str(), 0, 0));
 	return strtol(row[row.size()-1].c_str(), 0, 0);
 }
+
+//---------------------------------------------------------------------------------------
+// remove records over  maxDays old and if there are more than maxRecords.
+void PacketizerCamsDB::CleanupDB(int maxDays, int maxRecords)
+{
+	db_monitor::DBMonitorContext db;
+	// Delete records older than maxDays
+	std::string strQuery = 	str(boost::format("DELETE FROM message_table WHERE event_time < datetime('now', '-%d seconds'); ") % (maxDays * 86400) % maxRecords);
+	dbquery(db, m_packetizerdb_name,  strQuery);
+
+	// now look for exceedeing maximum number of records.
+	dbquery(db, m_packetizerdb_name, "SELECT COUNT(*) FROM message_table; ");
+	const db_monitor::ResultRow& row = db.Table()[0];
+	int val = atoi(row[0].c_str());
+	
+	if (val > maxRecords)
+	{
+		ats_logf(ATSLOG_DEBUG, "CleanupDB - Too many records - trimming database");
+		strQuery = 	str(boost::format("delete from message_table where mid IN (select mid from message_table limit %d);") % (val - maxRecords));
+		dbquery(db, m_packetizerdb_name, strQuery);
+	}
+}
+
+
+

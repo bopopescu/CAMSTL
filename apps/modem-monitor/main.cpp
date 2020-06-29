@@ -47,18 +47,6 @@ ATSLogger g_log_net;
 
 static const ats::String g_ppp0_pid_file("/var/run/ppp0.pid");
 static const ats::String g_app_name("modem-monitor");
-
-static bool g_bSentInetNotification_1 = false;
-static bool g_bSentInetNotification_2 = false;
-static bool g_bSentInetNotification_2_2 = false;
-static bool g_bSentInetNotification_3 = false;
-// <ISCP-360>: Error 1019
-static bool isCellModemResponding = true;
-static int cellModemResponseCount = 1;
-static int modemPowerFailCont = 1;
-//</ISCP-360>
-
-
 bool bEndThread;
 class MyData 
 {
@@ -89,35 +77,10 @@ void* reader_thread(void* p_MyData)
 	char respBuf[MAX_CHAR_READ];
 	MyData *pMyData = (MyData *)(p_MyData);
 	
-//<ISCP-360>
-	AFS_Timer t;
-	std::string user_data;
-
-
-	ats_logf(ATSLOG(0), "Try Openning /dev/ttyGPSAT for reading.[%d]..\n",modemPowerFailCont);
-	if(++modemPowerFailCont == 4)
-	{
-
-			modemPowerFailCont = 5;
-			isCellModemResponding = false;
-			ats_logf(ATSLOG(0), "Cellular Modem Not Powering UP - Error 1019");
-			t.SetTime();
-						
-			user_data = "1019," + t.GetTimestampWithOS() + ", TGX Cellular Module Error";
-			ats_logf(ATSLOG(0), "%s,%d: TGX Cellular Module Error Logged:%s\n",__FILE__, __LINE__, user_data.c_str());
-			user_data = ats::to_hex(user_data);
-			send_redstone_ud_msg("message-assembler", 0, "msg inet_error msg_priority=9 usr_msg_data=%s\r", user_data.c_str());
-		
-	}
-//</ISCP-360>	
 	// open GPSAT for reading
 
 	while (!exists("/dev/ttyGPSAT"))
-	{
-		
 		usleep(100000);
-	}
-	modemPowerFailCont = 0; // clear the error count
 
 	ats_logf(ATSLOG_INFO, "/dev/ttyGPSAT has been found");
 	
@@ -162,24 +125,8 @@ void* reader_thread(void* p_MyData)
 		if ((count % 300) == 0) // request service state every minute at 5 hz
 		{
 			write(fdw, "at^SIND=\"service\",1\r", strlen("at^SIND=\"service\",1\r"));
-			
-			ats_logf(ATSLOG(0), "Sending AT^SIND [%d]",cellModemResponseCount);
+			ats_logf(ATSLOG_INFO, "Sending AT^SIND");
 			count = 1;
-//<ISCP-360>
-			if(isCellModemResponding == true && (++cellModemResponseCount > 15)) //MAX_CELL_RESPONSE_COUNT
-			{
-					isCellModemResponding = false;
-					ats_logf(ATSLOG(0), "Cellular Modem Not Responding - Error 1019");
-
-						t.SetTime();
-						
-						user_data = "1019," + t.GetTimestampWithOS() + ", TGX Cellular Module Error";
-						ats_logf(ATSLOG(0), "%s,%d: TGX Cellular Module Error Logged:%s\n",__FILE__, __LINE__, user_data.c_str());
-						user_data = ats::to_hex(user_data);
-						send_redstone_ud_msg("message-assembler", 0, "msg inet_error msg_priority=9 usr_msg_data=%s\r", user_data.c_str());
-					
-			}
-//</ISCP-360>
 		}
 
 		comSelect.Select();
@@ -199,13 +146,8 @@ void* reader_thread(void* p_MyData)
 				{
 					if (strlen(respBuf) > 5)
 					{
-						ats_logf(ATSLOG_DEBUG, "Processing:##%s##", respBuf);
+						ats_logf(ATSLOG_INFO, "Processing:##%s##", respBuf);
 						ats_logf(ATSLOG_DEBUG, "bService %d", pMyData->bService);
-						if (strstr(respBuf, "+CIEV: service") || strstr(respBuf, "SIND: service") )
-						{
-								isCellModemResponding = true;//
-								cellModemResponseCount = 0;
-						}
 					}
 					if (strstr(respBuf, "+CIEV: service,0") || strstr(respBuf, "SIND: service,1,0")  && pMyData->bService)
 					{
@@ -213,17 +155,13 @@ void* reader_thread(void* p_MyData)
 						ats::system("killall pppd");
 						g_RedStone.ModemState(AMS_NO_CARRIER);
 						g_RedStone.pppState(APS_UNCONNECTED);
-						ats_logf(ATSLOG(0), "service to tower lost - bService %d", pMyData->bService);
-						isCellModemResponding = true;//
-						cellModemResponseCount = 0;
+						ats_logf(ATSLOG_DEBUG, "service to tower lost - bService %d", pMyData->bService);
 					}
 					else if ( strstr(respBuf, "+CIEV: service,1") || strstr(respBuf, "SIND: service,1,1") && !pMyData->bService) 
 					{
 						pMyData->bService = true;
 						g_RedStone.ModemState(AMS_NO_PPP);
 						count = 1;
-						isCellModemResponding = true;//
-						cellModemResponseCount = 0;
 
 						if (g_RedStone.pppState() != APS_CONNECTING) // if it is 1 connect-ppp is running but not finished.
 						{
@@ -233,11 +171,7 @@ void* reader_thread(void* p_MyData)
 						else
 							ats_logf(ATSLOG_DEBUG, "NOT running ppp");
 
-						ats_logf(ATSLOG(0), "service to tower restored: ModemState %d  pppState %d, bService %d", g_RedStone.ModemState(),g_RedStone.pppState(), pMyData->bService);
-					}
-					else // not valid response
-					{
-
+						ats_logf(ATSLOG_DEBUG, "service to tower restored: ModemState %d  pppState %d, bService %d", g_RedStone.ModemState(),g_RedStone.pppState(), pMyData->bService);
 					}
 				}
 			}
@@ -247,8 +181,6 @@ void* reader_thread(void* p_MyData)
 			usleep(100000); // 1/10th of a second - with another tenth in the ComSelect
 			++count;
 		}
-
-
 	}
 
 	ats_logf(ATSLOG_DEBUG, "Reader thread is terminating.");
@@ -373,24 +305,19 @@ static void term(int signum)
 //-----------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
-
 	ATSLogger::set_global_logger(&g_log);
 	g_log.open_testdata(g_app_name);
 	AWARE_MODEM_STATES lastModemState = AMS_UNSET;
 	short count = 0;
-	short count2 = 0;
 	pthread_t m_reader_thread;
 	
-	AFS_Timer t;
-	std::string user_data;
-
 	MyData md;
 	db_monitor::ConfigDB db;
 
 	g_log.set_level(db.GetInt("RedStone", "LogLevel", 0));
 
-	ats_logf(ATSLOG(0), "-------------- %s", (g_app_name + " started").c_str());
-	ats_logf(ATSLOG(0), "On startup: ModemState %d  pppState %d", g_RedStone.ModemState(),g_RedStone.pppState());
+	ats_logf(ATSLOG_ERROR, "-------------- %s", (g_app_name + " started").c_str());
+	ats_logf(ATSLOG_DEBUG, "On startup: ModemState %d  pppState %d", g_RedStone.ModemState(),g_RedStone.pppState());
 
 	{
 		struct sigaction action;
@@ -439,7 +366,7 @@ int main(int argc, char *argv[])
 		{
 			if (++count >=60)
 			{
-				ats_logf(ATSLOG(0), "No connection for 5 minutes. Repowering modem.");
+				ats_logf(ATSLOG_ERROR, "No connection for 5 minutes. Repowering modem.");
 				turn_off_modem();
 				md.bService = false;
 				pPPPisSet = false;
@@ -459,58 +386,22 @@ int main(int argc, char *argv[])
 			switch (lastModemState)
 			{
 				case AMS_NO_COMM:  // no comms with modem at all
-					if(isCellModemResponding == false)
-					{
 					send_redstone_ud_msg("i2c-gpio-monitor", 0, "blink kick name=cell led=cell script=\"0,1000000\"\r");
 					send_redstone_ud_msg("i2c-gpio-monitor", 0, "blink kick name=cellr led=cell.r script=\"1,1000000\"\r");
-					}
-					//ISCP-163
-					if(!g_bSentInetNotification_1)
-					{					
-
-						//.t.SetTime();
-						g_bSentInetNotification_1 = true;
-						//.user_data = "991," + t.GetTimestampWithOS() + ", TGX Cellular Module Error";
-						ats_logf(ATSLOG(0), "%s,%d: No Communication with TGX Cellular:\n",__FILE__, __LINE__);
-						//.user_data = ats::to_hex(user_data);
-						//.send_redstone_ud_msg("message-assembler", 0, "msg inet_error msg_priority=9 usr_msg_data=%s\r", user_data.c_str());
-					}
-					
 					break;
 				case AMS_NO_SIM:  // SIM undetected
-     				//ISCP-248				
 					send_redstone_ud_msg("i2c-gpio-monitor", 0, "blink kick name=cell led=cell script=\"0,1000000\"\r");
-					send_redstone_ud_msg("i2c-gpio-monitor", 0, "blink kick name=cellr led=cell.r script=\"1,1000000\"\r");
-						g_bSentInetNotification_2 = true;
-
+					send_redstone_ud_msg("i2c-gpio-monitor", 0, "blink kick name=cellr led=cell.r script=\"1,1000000;0,200000\"\r");
 					break;
 				case AMS_NO_CARRIER:  // SIM detected - no carrier (wrong apn?)
-				    //ISCP-248
 					send_redstone_ud_msg("i2c-gpio-monitor", 0, "blink kick name=cell led=cell script=\"0,1000000\"\r");
-					send_redstone_ud_msg("i2c-gpio-monitor", 0, "blink kick name=cellr led=cell.r script=\"1,1000000\"\r");
-					ats_logf(ATSLOG(0), "%s,%d: No Cellular Carrier:\n",__FILE__, __LINE__);
+					send_redstone_ud_msg("i2c-gpio-monitor", 0, "blink kick name=cellr led=cell.r script=\"1,1000000;0,200000;1,200000;0,200000\"\r");
 					break;
 				case AMS_NO_PPP:  // service - no ppp - missing antenna?
 					send_redstone_ud_msg("i2c-gpio-monitor", 0, "blink kick name=cell led=cell script=\"0,1000000\"\r");
 					send_redstone_ud_msg("i2c-gpio-monitor", 0, "blink kick name=cellr led=cell.r script=\"1,1000000;0,200000;1,200000;0,200000;1,200000;0,200000\"\r");
-					//ISCP-163
-					if(!g_bSentInetNotification_3)
-					{					
-						//.t.SetTime();						
-						g_bSentInetNotification_3 = true;
-						//.user_data = "1008," + t.GetTimestampWithOS() + ", TGX Cellular Communication Error";
-						ats_logf(ATSLOG(0), "%s,%d: TGX Cellular Communication NO PPP:\n",__FILE__, __LINE__);
-						//.user_data = ats::to_hex(user_data);
-						//.send_redstone_ud_msg("message-assembler", 0, "msg inet_error msg_priority=9 usr_msg_data=%s\r", user_data.c_str());
-					}
 					break;
 				case AMS_PPP_ESTABLISHED:  // ppp established
-					g_bSentInetNotification_1 = false; // reset flags to generate cellular errors again after recovery
-					g_bSentInetNotification_2 = false;
-					g_bSentInetNotification_2_2 = false;
-					g_bSentInetNotification_3 = false;
-					count2 = 0;
-					
 					send_redstone_ud_msg("i2c-gpio-monitor", 0, "blink kick name=cell led=cell script=\"1,1000000\"\r");
 					send_redstone_ud_msg("i2c-gpio-monitor", 0, "blink kick name=cellr led=cell.r script=\"0,1000000\"\r");
 					break;
@@ -518,24 +409,7 @@ int main(int argc, char *argv[])
 					break;
 			}			
 		}
-
-		if(g_bSentInetNotification_2 && !g_bSentInetNotification_2_2) // for SIM Card Error, this needs to be sent with some delay
-		{
-			if(count2++ > 10)
-			{
-			//ISCP-163
-						t.SetTime();						
-						g_bSentInetNotification_2 = false;
-						g_bSentInetNotification_2_2 = true;
-						user_data = "982," + t.GetTimestampWithOS() + ", SIM Card Error";
-						ats_logf(ATSLOG(0), "%s,%d: TGX SIM Card Error Logged:%s\n",__FILE__, __LINE__, user_data.c_str());
-						user_data = ats::to_hex(user_data);
-						send_redstone_ud_msg("message-assembler", 0, "msg inet_error msg_priority=9 usr_msg_data=%s\r", user_data.c_str());
-						count2 = 0;
-			}
-		
-
-		}
+		ats_logf(ATSLOG_ERROR, "Sleeping. pppState %d", g_RedStone.pppState());
 		
 		sleep(5);
 	}

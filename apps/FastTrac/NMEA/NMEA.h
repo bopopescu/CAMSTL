@@ -41,10 +41,10 @@ private:
   bool m_bReadyToSendID;        // ready to send ID out port (set every 10 seconds)
   bool m_bReadyToSendInputs;    // ready to send Inputs out port - received notification from i2c-gpio-monitor that an input has changed
   bool m_sendGPS;               // flag for whether the output to local cams is being used
-
+//<non-isc>
   bool m_isValid;
   short m_gps_quality;   
-
+//</non-isc>
 public:
   NMEA();
   

@@ -50,11 +50,6 @@ REDSTONE_IPC g_redStoneData;
 
 ats::String strStateDesc;	// description of state for logging and stat command
 
-static bool g_bSentInetNotification_lb = false;
-static bool g_bSentInetNotification_cb = false;
-
-
-//=======================================================================================================================================
 PowerMonitorStateMachine::PowerMonitorStateMachine(StateMachineData& p_data) : StateMachine(p_data)
 {
 	MyData& md = *((MyData*)&(my_data()));
@@ -77,7 +72,7 @@ PowerMonitorStateMachine::PowerMonitorStateMachine(StateMachineData& p_data) : S
 	m_CountLowBattery = 0;
 	m_IgnitionDelay = 120;// db.GetInt("power-monitor", "IgnitionDelay", 120); // no lower than 10 seconds
 	m_bWokeOnCritBatt = false;
-	m_firmwareUpdateTime = 0;
+
 	SET_NEXT_STATE(0);
 }
 
@@ -280,32 +275,18 @@ void PowerMonitorStateMachine::state_2()
 		}
 		else if(e.m_event == timer)
 		{
-			m_firmwareUpdateTime = g_redStoneData.GetFirmwareUpdateTime() - time(NULL);
-
-			ats_logf(ATSLOG_DEBUG, "%s,%d:Firmware will Update After %ld Sec\n", __FILE__, __LINE__,m_firmwareUpdateTime);
 			// waited 10 seconds - check for activity
-			if( ( true == g_redStoneData.GetFirmwareUpdateStatus() ) && (0 > m_firmwareUpdateTime) )
-			{ 
-				ats_logf(ATSLOG_DEBUG, "%s,%d: Checking for new Firmware:\n", __FILE__, __LINE__); 
-				SET_NEXT_STATE(5);
-			}
-			else
-			{
 			SET_NEXT_STATE(3);
-			}
 			break;
 		}
 	}
 }
 
 
-//=======================================================================================================================================
 void PowerMonitorStateMachine::state_3()
 {
-	int version = 4;
 	strStateDesc = "State 3 - Checking jobs";
 	ats_logf(ATSLOG_DEBUG, "%s (%.2f) (%d)", strStateDesc.c_str(), g_redStoneData.BatteryVoltage(), m_CountLowBattery);
-	ats_logf(ATSLOG_DEBUG, "\r\nPower-monitor - versrion = %d \r\n",version); 
 
 	MyData& md = *((MyData*)&(my_data()));
 
@@ -313,17 +294,6 @@ void PowerMonitorStateMachine::state_3()
 	{
  		if (++m_CountLowBattery >= 3)
 		{
-			if (!g_bSentInetNotification_lb) //<ISCP-164>
-			{
-				ats_logf(ATSLOG_DEBUG, "Power-monitor sending low battery warning\r");
-				g_bSentInetNotification_lb = true;
-				AFS_Timer t;
-				t.SetTime();
-				std::string user_data = "1000," + t.GetTimestampWithOS() + ", Low Battery Warning";
-				user_data = ats::to_hex(user_data);
-
-				send_redstone_ud_msg("message-assembler", 0, "msg inet_error msg_priority=9 usr_msg_data=%s\r", user_data.c_str());
-			}
 			if (CheckForLowBattery())
 			{
 				SET_NEXT_STATE(8);
@@ -418,7 +388,6 @@ void PowerMonitorStateMachine::state_4()
 	int timeOut = 0;
 	bool isOneMinuteTimeOutTrue = false; //ISCP-292
 	MyData& md = *((MyData*)&(my_data()));
-	static  bool isShutdownMessageSent = false;
 
 	for(;;)
 	{
@@ -432,17 +401,6 @@ void PowerMonitorStateMachine::state_4()
 			{
 				if (++m_CountLowBattery == 3)
 				{
-					if (!g_bSentInetNotification_lb) //<ISCP-164>
-					{
-						ats_logf(ATSLOG_DEBUG, "Power-monitor sending low battery warning 2\r");
-						g_bSentInetNotification_lb = true;
-						AFS_Timer t;
-						t.SetTime();
-						std::string user_data = "1000," + t.GetTimestampWithOS() + ", Low Battery Warning";
-						user_data = ats::to_hex(user_data);
-
-						send_redstone_ud_msg("message-assembler", 0, "msg inet_error msg_priority=9 usr_msg_data=%s\r", user_data.c_str());
-					}
 					if (CheckForLowBattery())
 					{
 						SET_NEXT_STATE(8);
@@ -460,14 +418,7 @@ void PowerMonitorStateMachine::state_4()
 
 		}
 
-//isc-162		
-		if (timer.DiffTime() > secs  && (isShutdownMessageSent == false))
-		{
-			g_redStoneData.SetInstrumentShutdownStatus(true);
-                        g_redStoneData.SetInstrumentShutdownMessageStatus(false);
-			isShutdownMessageSent = true;
-		}
-		if (timer.DiffTime() > (secs + 300*6) || (g_redStoneData.GetInstrumentShutdownMessageStatus() == true))//instrument will shutdown after getting the signal from Cell or Satellite OR if wait of 30 min ends
+		if (timer.DiffTime() > secs)
 		{	
 			SET_NEXT_STATE(6) ;
 			return;
@@ -477,8 +428,6 @@ void PowerMonitorStateMachine::state_4()
 		{
 			ats_logf(ATSLOG_DEBUG, "Moving to state 2");
 			SET_NEXT_STATE(2);
-			//reset flag
-			isShutdownMessageSent = false;
 			break;
 		}
 
@@ -539,36 +488,6 @@ void PowerMonitorStateMachine::state_5()
 // state 6 : Shutting down
 void PowerMonitorStateMachine::state_6()
 {
-	ats_logf(ATSLOG_DEBUG, "%s,%d: Shutdown state active\n", __FILE__, __LINE__);
-	//ISCP-209 Changes
-	// do a reboot if there is an update pending.  Otherwise just shut down.
-	if( ( true == g_redStoneData.GetFirmwareUpdateStatus() ) && (0 > m_firmwareUpdateTime) )
-	{
-		//No other option reboot system
-		if(ats::file_exists("/mnt/update/update-ready-to-run") )
-		{
-			MyData& md = *((MyData*)&(my_data()));
-			md.set_shutdown_flag();
-			sleep(10);
-			ats::system(ats::String("sh /home/root/on_shutdown.sh"));
-			send_redstone_ud_msg("isc-lens", 0, "shutdown\r");
-			g_redStoneData.SetFirmwareUpdateStatus(false);
-			ats_logf(ATSLOG_DEBUG, "%s,%d: ISCP- 209 Reboot For Firmware Update\n", __FILE__, __LINE__);
-			sleep(30);  // allow isc-lens time to send out its shutdown.
-			ats::system("reboot");
-			ats::infinite_sleep();
-		}
-		else
-		{
-			ats_logf(ATSLOG_DEBUG, "%s,%d: ISCP- 209 Firmware Update started but Firm File Downloadded Failed\n", __FILE__, __LINE__);
-			//it seems firmware update is not schedule from Aware Check after 10 minutes
-			g_redStoneData.SetFirmwareUpdateTime( time(NULL) + 1800 );
-			SET_NEXT_STATE(2);
-		}
-		//ats::system( ats::String(ats::file_exists("/mnt/update/update-ready-to-run") ? "reboot" : "go-to-sleep;"));
-	}
-	else
-	{
 	strStateDesc = "State 6 - Shutting Down";
 		ats_logf(ATSLOG_DEBUG, "%s (%.2f)", strStateDesc.c_str(), g_redStoneData.BatteryVoltage());
 
@@ -578,9 +497,6 @@ void PowerMonitorStateMachine::state_6()
 		ats::system("go-to-sleep");
 		ats::infinite_sleep();
 	}
-
-	//ats::system( ats::String(ats::file_exists("/mnt/update/update-ready-to-run") ? "reboot" : "go-to-sleep;"));	
-}
 
 //=======================================================================================================================================
 // state 7 - New power keep awake - stays here for 5 minutes.
@@ -602,18 +518,6 @@ void PowerMonitorStateMachine::state_8()
 	ats_logf(ATSLOG_ERROR, "%s (%.2f)", strStateDesc.c_str(), g_redStoneData.BatteryVoltage());
 	ats::system(ats::String("sh /home/root/on_shutdown.sh"));
 	MyData& md = *((MyData*)&(my_data()));
-
-	if (!g_bSentInetNotification_cb) //<ISCP-164>
-	{
-		ats_logf(ATSLOG_DEBUG, "Power-monitor sending critical battery warning\r");
-		g_bSentInetNotification_cb = true;
-		AFS_Timer t;
-		t.SetTime();
-		std::string user_data = "1016," + t.GetTimestampWithOS() + ", Critical Battery Warning";
-		user_data = ats::to_hex(user_data);
-
-		send_redstone_ud_msg("message-assembler", 0, "msg inet_error msg_priority=9 usr_msg_data=%s\r", user_data.c_str());
-	}
 
 	while (1)
 	{
@@ -642,9 +546,6 @@ void PowerMonitorStateMachine::state_8()
 //=======================================================================================================================================
 bool PowerMonitorStateMachine::CheckForLowBattery()
 {
-
-	
-
 	if (g_redStoneData.BatteryVoltage() > m_CriticalVoltage )	//check for low battery
 		return false;
 		
@@ -652,18 +553,6 @@ bool PowerMonitorStateMachine::CheckForLowBattery()
 	{
 		send_redstone_ud_msg("message-assembler", 0, "msg crit_batt set_work_priority=2\r");
 		ats_logf(ATSLOG_ERROR,"Power-monitor - sent critical battery. Battery voltage: %f", g_redStoneData.BatteryVoltage());
-		if (!g_bSentInetNotification_cb) //<ISCP-164>
-		{
-		
-				ats_logf(ATSLOG_DEBUG, "Power-monitor sending critical battery warning\r");
-				g_bSentInetNotification_cb = true;
-				AFS_Timer t;
-				t.SetTime();
-				std::string user_data = "1016," + t.GetTimestampWithOS() + ", Critical Battery Warning";
-				user_data = ats::to_hex(user_data);
-
-				send_redstone_ud_msg("message-assembler", 0, "msg inet_error msg_priority=9 usr_msg_data=%s\r", user_data.c_str());
-		}		
 		system("i2cset -y 0 0x30 0x29 0xD1");  // tell the micro to turn off all the rails
 		system("i2cset -y 0 0x30 0x26 0x01");  // tell the micro not to wake up on crit batt check because message was sent.
 		sleep(5);

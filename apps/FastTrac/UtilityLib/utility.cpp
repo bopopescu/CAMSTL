@@ -102,21 +102,3 @@ char * StripCRLF(char * str)
 	}
 	return str;
 }
-
-//---------------------------------------------------------------------------------------
-// Do whatever it takes to determine if the internet is available
-//  First check that we have a gateway (/tmp/ramdisk/inet.good exists)
-//  Then we check that a ping to google gets through.
-//
-bool IsInternetAvailable()
-{
-//	if (!FileExists("/tmp/ramdisk/inet.good")	)
-//		return false;
-
-	system("/usr/bin/testping");
-
-	if (!FileExists("/tmp/ramdisk/ping.good")	)
-		return false;
-
-	return true;
-}

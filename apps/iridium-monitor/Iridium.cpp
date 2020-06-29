@@ -24,10 +24,6 @@
 #include "utility.h"
 #include "Iridium.h"
 
-#define IRIDIUM_FW_VERSION 8
-#define IRIDIUM_MAX_FAIL_COUNT 5 //!\todo decide the max value
-
-
 pthread_mutex_t IRIDIUM::m_cmdBufferMutex;
 pthread_mutex_t IRIDIUM::m_respBufferMutex;
 pthread_mutex_t IRIDIUM::m_statusMutex;
@@ -42,10 +38,6 @@ int lastLevel, curLevel; // Level is 0 - no network or rssi = 0, 1 - rssi <= 2, 
 
 bool IRIDIUM::bTxInProgress = false; //<ISCP-238>
 
-static bool g_bSentInetNotification = false;
-static int failCount = 0;
-static int e_enabled = 0;
-
 IRIDIUM::IRIDIUM()
 {
 	m_bNetworkAvailable = false;
@@ -55,7 +47,6 @@ IRIDIUM::IRIDIUM()
 
 void IRIDIUM::init()
 {
-
 	pthread_mutex_init(&m_cmdBufferMutex, 0);
 	pthread_mutex_init(&m_respBufferMutex, 0);
 	ats::system("stty -F /dev/ttySP4 -echo raw 19200");
@@ -70,31 +61,6 @@ void IRIDIUM::init()
 	pthread_create(&(m_reader_thread),	(pthread_attr_t*)0, reader_thread,	this);
 	IRIDIUM::STATUS_CODES status;
 	
-
-		// <ISCP-163>
-		db_monitor::ConfigDB db;
-		e_enabled = db.GetInt("iridium-monitor", "ErrorEnabled", 0);   
-		
-
-		if(e_enabled == 1)
-		{
-
-			ats_logf(ATSLOG_DEBUG, "IridiumInit() 1 ");
-		}
-		else
-		{
-			ats_logf(ATSLOG_DEBUG, "IridiumInit() 0 ");
-			db.Set("iridium-monitor", "IridiumFailCount", ats::toStr(0));
-			db.Set("iridium-monitor", "ErrorNotified", ats::toStr(0));
-		}
-		
-		db.Set("iridium-monitor", "ErrorEnabled", ats::toStr(0));
-		failCount = db.GetInt("iridium-monitor", "IridiumFailCount", 0);  // 
-		g_bSentInetNotification = db.GetInt("iridium-monitor", "ErrorNotified", 0);  // 
-		
-		ats_logf(ATSLOG_DEBUG, "IridiumInit() %d = %d - %d\r",failCount,e_enabled,g_bSentInetNotification);
-		// <\ISCP-163>
-
 	// we now go into an infinite loop until the irdium module is set up.
 	while (1)
 	{
@@ -106,42 +72,15 @@ void IRIDIUM::init()
 			UnlockStatus();
 
 			if(m_status == PASSED)
-			{
-				//<ISCP-163>
-				g_bSentInetNotification = false; // reset notification send and fail count if Iridium Modem is responding
-				failCount = 0;
-				db.Set("iridium-monitor", "ErrorEnabled", ats::toStr(0));
-				db.Set("iridium-monitor", "ErrorNotified", ats::toStr(0));
-				//<\ISCP-163>
 				return;
-			}
 
 			SendRespond("AT*F\r");
 			SetPower(false);
 			sleep(2); //sleep 2 seconds as per the document "IRidium - 9603 - DeveloperGuide - V.9 - Preliminary_DEVGUIDE_May2012.pdf"
 		}
-
-		//<ISCP-163>
-		if (!g_bSentInetNotification && failCount >= IRIDIUM_MAX_FAIL_COUNT)
-		{
-			ats_logf(ATSLOG_DEBUG, "Iridium sending error message\r");
-			g_bSentInetNotification = true;
-			db.Set("iridium-monitor", "ErrorNotified", ats::toStr(1));
-			AFS_Timer t;
-			t.SetTime();
-			std::string user_data = "1020," + t.GetTimestampWithOS() + ", Iridium Module Not Responding Error";
-			user_data = ats::to_hex(user_data);
-
-			send_redstone_ud_msg("message-assembler", 0, "msg inet_error msg_priority=9 usr_msg_data=%s\r", user_data.c_str());
-		}
-		else if(!g_bSentInetNotification)
-		{
-
 		send_redstone_ud_msg("i2c-gpio-monitor", 0, "blink add name=iridium-monitor.g led=sat script=\"0,1000000\" \r");  
 		send_redstone_ud_msg("i2c-gpio-monitor", 0, "blink add name=iridium-monitor.r led=sat.r script=\"1,1000000\" \r");  
-			ats_logf(ATSLOG_ERROR, "ERROR - Iridium initialization failure.  Waiting 30 seconds to try again [%d]",failCount);
-		
-		}//<\ISCP-163>
+		ats_logf(ATSLOG_ERROR, "ERROR - Iridium initialization failure.  Waiting 30 seconds to try again");
 		sleep(30);
 	}
 
@@ -171,7 +110,6 @@ void IRIDIUM::SetPower(bool state)
 	}
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 IRIDIUM::STATUS_CODES IRIDIUM::Setup()
 {
@@ -179,9 +117,6 @@ IRIDIUM::STATUS_CODES IRIDIUM::Setup()
 
 	SetPower(true);
 	sleep(2); //wait for Iridium module to boot up
-
-	ats_logf(ATSLOG_DEBUG, "[%d] - Iridium FW Version\r", IRIDIUM_FW_VERSION);
-
 
 	if ((ret = SendRespond("ATE0\r")) != OK) // turn echo off
 	{
@@ -457,7 +392,6 @@ void* IRIDIUM::reader_thread(void* p_iridium)
 	IRIDIUM& iridium = *((IRIDIUM*)p_iridium);
 	CSelect irdSelect;
 	AFS_Timer noCharsTimer;
-	db_monitor::ConfigDB db;
 
 	int fdr = open(IRIDIUM_PORT, O_RDONLY| O_NOCTTY);
 	if (fdr < 0)
@@ -537,19 +471,7 @@ void* IRIDIUM::reader_thread(void* p_iridium)
 				sleep(5);  // wait then try again.
 				if ((ret = SendRespond("AT\r")) == NONE) // if we don't get an OK back we need to restart irdium-monitor
 				{
-					//<ISCP-163>
-					if(failCount < IRIDIUM_MAX_FAIL_COUNT)
-					{
-						failCount++;	
-						db.Set("iridium-monitor", "IridiumFailCount", ats::toStr(failCount));
-					}
-					if(e_enabled == 0)
-					{
-						db.Set("iridium-monitor", "ErrorEnabled", ats::toStr(1));	
-					}
-					//<\ISCP-163>
-
-					ats_logf(ATSLOG_DEBUG, "%s:%d:%d - No chars on port - exiting", __FILE__, __LINE__,failCount);
+					ats_logf(ATSLOG_DEBUG, "%s:%d - No chars on port - exiting", __FILE__, __LINE__);
 					send_redstone_ud_msg("i2c-gpio-monitor", 0, "blink add name=iridium-monitor.g led=sat script=\"0,1000000\" \r");  
 	 				send_redstone_ud_msg("i2c-gpio-monitor", 0, "blink add name=iridium-monitor.r led=sat.r script=\"1,1000000\" \r");  
 	 				system("killall iridium-monitor&");  // only way to kill it!
@@ -565,7 +487,6 @@ void* IRIDIUM::reader_thread(void* p_iridium)
 	}
 	return 0;
 }
-
 
 bool IRIDIUM::ProcessSBDIXResponse(const ats::String& response, SBD_Status &status)
 {
@@ -664,49 +585,128 @@ bool IRIDIUM::ProcessSBDIXResponse(const ats::String& response, SBD_Status &stat
 	return true;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
-// GetResponse - get response
-// Author : HAMZA MEHBOOB
-void IRIDIUM::GetResponse(char * p_msgBuf)	
-{
-	for(int i =0; i <40; i++)
-	{
-		p_msgBuf[i] = m_MessageRecieved[i];
-	}	
-	for(int i =0; i <40; i++)
-	{
-		m_MessageRecieved[i] = 0;
-	}	 // ISCP-339, old response from translator needs to be cleared to update cloud icon/iNet status
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-// ProcessIridiumResponse - copy response buffer 
-// Author : Hamza Mehboob
-//void IRIDIUM::ProcessIridiumResponse(std::vector<char>&  iridiumResponse)
-void IRIDIUM::ProcessIridiumResponse(std::string iridiumResponse)
-{
-	if((iridiumResponse.find("02")!= std::string::npos) || (iridiumResponse.find("05")!= std::string::npos))
-	{
-		iridiumResponse.copy(m_MessageRecieved,40,0);
-	}
-
-}
-//298
-
 
 bool IRIDIUM::ProcessMTMessage(std::vector<char>& buf)
 {
-
+//	ats_logf(ATSLOG_DEBUG, "Processing incoming message: Raw data read in buffer.");
+	{
 		std::stringstream ostream;
-		//ostream << "RECV["<<buf.size()<< "]: ";
+		ostream << "RECV["<<buf.size()<< "]: ";
 		for (uint i= 0 ; i < buf.size(); ++i)
-		{
+	{
 			ostream << std::uppercase <<std::setfill('0') << std::setw(2)
 					<< std::hex << (int)(buf[i])<< " ";
 		}
 		ats_logf(ATSLOG_DEBUG, "%s:%d - Incoming MTMessage: %s", __FILE__, __LINE__, ostream.str().c_str());
-		// ISCP-298
-		ProcessIridiumResponse(ostream.str());
+}
+
+	if (buf.size() < 5)
+	{
+		ats_logf(ATSLOG_DEBUG, "MT Message length is too small.");
+		return false;
+	}
+
+	uint msg_size = buf[1] + buf[0] * 256;
+	if(buf.size() < msg_size + 4)
+	{
+		ats_logf(ATSLOG_DEBUG, "MT Message length is too small.Read size: %d, Buff size: %zd", msg_size, buf.size());
+		return false;
+}
+
+	ushort checksum = buf[msg_size + 3] + buf[msg_size + 2] * 256;
+	std::vector<char> msg(buf.begin() + 2, buf.end() - 2);
+	ushort calc_checksum = ComputeCheckSum(msg);
+
+	if(checksum != calc_checksum)
+{
+		ats_logf(ATSLOG_DEBUG, "MT Message checksum incorrect.calc_checksum=%d checksum=%d", calc_checksum, checksum);
+		return false;
+	}
+
+	//do something with message now
+	{
+/*
+		std::stringstream ostream;
+		ostream << "RECV["<<msg_size<< "]: ";
+		for (uint i= 0 ; i < msg_size; ++i)
+		{
+			ostream << std::uppercase <<std::setfill('0') << std::setw(2)
+					<< std::hex << (int)(msg[i])<< " ";
+		}
+		ats_logf(ATSLOG_INFO, "%s", ostream.str().c_str());
+*/
+		if(8 >= msg.size())//ID is long long int.
+	  {
+			ats_logf(ATSLOG_DEBUG, "%s,%d: Message recieved in unknown format. Id size(eight bytes) exceeds message size(%d bytes).", __FILE__, __LINE__, msg.size());
+			return false;
+	  }
+
+		uint id_size = (uint)msg[0];
+		if(id_size >= msg.size())
+		{
+			ats_logf(ATSLOG_DEBUG, "%s,%d: Message recieved in unknown format. Id size(%d bytes) exceeds message size(%d bytes).",
+					 __FILE__, __LINE__, id_size, msg.size());
+			return false;
+		}
+		ats::String id(msg.begin() + 1, msg.begin() + id_size + 1);
+
+//		uint64_t idNumber = (((msg[8])&0xFFULL) << 56) |  (((msg[7])&0xFFULL) << 48) | (((msg[6])&0xFFULL) << 40) | (((msg[5])&0xFFULL) << 32) | (((msg[4])&0xFF) << 24) | (((msg[3])&0xFF) << 16) | (((msg[2])&0xFF) << 8) |  (((msg[1])&0xFF));  
+
+//		ats::String id;
+//		ats_sprintf(&id, "%lld", idNumber);
+
+		//check db-config
+		ats_logf(ATSLOG_DEBUG, "%s,%d: Mobile ID of incoming message %s", __FILE__, __LINE__, id.c_str());
+		db_monitor::ConfigDB db;
+		ats::String socket = db.GetValue("devices", id);
+
+		if(!socket.empty())
+		{
+			ats_logf(ATSLOG_DEBUG, "%s,%d: Sending incoming data to socket= %s", __FILE__, __LINE__, socket.c_str());
+			send_redstone_ud_msg(socket.c_str(), 0, "iridium data=%s sender=packetizer-iridium id=%s\r", ats::to_hex(ats::String(msg.begin(), msg.end())).c_str(), id.c_str());
+		}
+		else if (id == m_strIMEI)
+		{
+			send_redstone_ud_msg("alarm-monitor", 0, "iridium data=%s sender=iridium-monitor\r", ats::to_hex(ats::String(msg.begin(), msg.end())).c_str());
+			ats_logf(ATSLOG_DEBUG, "%s,%d: Message received for this TruLink - forwarding to alarm-monitor", __FILE__, __LINE__);
+		}
+		else
+		{
+			ats_logf(ATSLOG_DEBUG, "%s,%d: Unknown Message ID received (%s) ", __FILE__, __LINE__, id.c_str());
+		}
+ 		// now send to other TRULinks if this unit is a 'primary' unit
+
+		if ( db.GetValue("system", "RouteOverride") == "primary")
+		{
+			int BroadcastPort = db.GetInt("system", "BroadcastPort", 39003);
+			std::string strIP = GetInterfaceAddr("eth0");
+			std::string strIPBcast = ReplaceLastOctet(strIP, 255);
+
+			try
+			{
+				boost::system::error_code error;
+				boost::asio::io_service io_service;
+				boost::asio::ip::udp::socket socket(io_service);
+
+				socket.open(boost::asio::ip::udp::v4(), error);
+		
+				if (!error)
+				{
+					socket.set_option(boost::asio::ip::udp::socket::reuse_address(true));
+					socket.set_option(boost::asio::socket_base::broadcast(true));
+
+					boost::asio::ip::udp::endpoint senderEndpoint(boost::asio::ip::address::from_string(strIPBcast.c_str()), BroadcastPort);						
+					std::string strData(msg.begin(), msg.end());
+					socket.send_to(boost::asio::buffer(strData), senderEndpoint);
+					socket.close(error);
+				}
+			}
+			catch (std::exception& e)
+			{
+				ats_logf(ATSLOG_ERROR, "%s,%d: Primary broadcast failed:Exception Error:%s", __FILE__, __LINE__, e.what());
+			}
+		}
+		}
 
 		return true; 
 }

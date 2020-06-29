@@ -10,7 +10,7 @@ class PowerMonitorStateMachine : public StateMachine
 {
 private:
 	bool m_bWokeOnCritBatt;  // set to true if wakeup was critical battery.
-	int64_t m_firmwareUpdateTime;
+	
 public:
 	PowerMonitorStateMachine(StateMachineData& );
 	virtual~ PowerMonitorStateMachine();

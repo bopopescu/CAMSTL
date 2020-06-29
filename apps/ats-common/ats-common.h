@@ -375,8 +375,9 @@ String to_hex(const String& p_s);
 String to_hex(std::vector <char> & p_src);
 
 String& to_hex(ats::String& p_des, const String& p_src);
+//<non-isc>
 String to_hex(const char *data, const int len);
-
+//</non-isc>
 String from_hex(const String& p_s);
 
 // Description: Returns the time from "p_tv" using format "p_format".

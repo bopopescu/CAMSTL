@@ -39,14 +39,6 @@ void IridiumSender::start()
 	m_dataLimitTimer.SetTime();
 }
 
-//298
-
-void IridiumSender::IridiumGetResponse(char * p_msgBuf)
-{
-	 m_pIridium.GetResponse(p_msgBuf);
-}
-//298
-
 bool IridiumSender::isNetworkAvailable()
 {
 	return (m_pIridium.IsNetworkAvailable() && isSBDReady());

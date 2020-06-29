@@ -16,6 +16,9 @@ public:
 	bool dbquery_curr_msg_from_packetizerdb(ats::StringMap& sm );
 	bool dbload_messagetypes(std::map<int,int>& p_mt);
 	int dbquery_SelectPriorityOneMessage();
+	
+	void CleanupDB(int maxDays, int maxRecords);  // remove records over  maxDays old and if there are more than maxRecords.
+
 };
 
 

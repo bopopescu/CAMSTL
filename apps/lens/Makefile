@@ -33,11 +33,21 @@ LD_FLAGS=\
 	-lrt \
 	-s
 
-EXEC=lens
+EXEC=telit-monitor
 
 SRC = \
-	main.cpp \
-	Lens.cpp
+	main.cpp\
+	ATCCID_AMH.cpp\
+	ATCGDCONT_AMH.cpp\
+	ATCIMI_AMH.cpp\
+	ATCOPS_AMH.cpp\
+	ATCREG_AMH.cpp\
+	ATCSQ_AMH.cpp\
+	PACSP1_AMH.cpp\
+	ATRFSTS_AMH.cpp\
+	ATPSNT_AMH.cpp\
+	ATCNUM_AMH.cpp\
+	PBREADY.cpp
 	
 CFLAGS=-Wall -Os
 

@@ -16,9 +16,7 @@ public:
 	IridiumSender();
 
 	void start();
-//298
-	void IridiumGetResponse(char * p_msgBuf);
-//298
+
 	bool isNetworkAvailable();
 	bool isSBDReady();
 	void waitForNetworkAvailable();

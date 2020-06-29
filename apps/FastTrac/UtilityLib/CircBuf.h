@@ -12,6 +12,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define TRUE 1
+#define FALSE 0
 template <class T, long m_nSize=10>
 class CircBuf
 {
@@ -129,10 +131,10 @@ public:
   short Peek(T *data, long max_data, long num, long location)
   {
     if (m_nSize == 0 || num < 1L)
-      return 0;
+      return FALSE;
 
     if (num > max_data ||  num > m_nElements)
-      return 0;
+      return FALSE;
 
     location = (location + m_Tail) % m_nSize;
 
@@ -157,13 +159,13 @@ public:
   short Delete(long start, long num)
   {
     if (m_nSize == 0 || num < 1L)
-      return 0;
+      return FALSE;
 
     if ( (num + start) >= m_nElements)  // deleting too much so wipe out from
     {                                  // from start to the end of the buffer
       m_Head = (m_Tail + start) % m_nSize;
       m_nElements = start;
-      return 1;
+      return TRUE;
     }
 
     long remaining;
@@ -184,11 +186,11 @@ public:
   short Extract(T *data, long max_data, long num)
   {
     if (m_nSize == 0 || num < 1L)
-      return 0;
+      return FALSE;
 
     if (num > max_data ||  num > m_nElements)
     {
-      return 0;
+      return FALSE;
     }
 
     long first;
@@ -213,11 +215,11 @@ public:
   // Remove 1 T from the CircBuffer - starting at the m_Tail
   short Extract(T &data)
   {
-    short rc = 1;
+    short rc = TRUE;
 
     if (m_nSize == 0 || m_nElements < 1)
     {
-      return 0;
+      return FALSE;
     }
 
     data = m_Elements[m_Tail];
@@ -232,14 +234,14 @@ public:
   // Remove num T's from the CircBuffer - starting at the m_Tail - don't fill an output buffer
   short Toss(long num)
   {
-     short rc = 1;
+     short rc = TRUE;
 
     if (m_nSize == 0 || num < 1L)
-      return 0;
+      return FALSE;
 
     if (num > m_nElements)
     {
-      return 0;
+      return FALSE;
     }
 
     m_Tail = (m_Tail + num) % m_nSize;
@@ -332,13 +334,13 @@ public:
   // Toss the first character
   short Toss(void)
   {
-    short rc = 0;
+    short rc = FALSE;
 
     if (m_Head != m_Tail)
     {
       m_Tail = (m_Tail + 1L) % m_nSize;
       --m_nElements;
-      rc = 1;
+      rc = TRUE;
     }
 
    return rc;
@@ -377,7 +379,7 @@ public:
     if (cr + 1 > maxChars)
       return -2;
 
-    if (Extract(strLine, maxChars, cr + 1) == 0)
+    if (Extract(strLine, maxChars, cr + 1) == FALSE)
       return -3;  // this should NEVER happen!
 
     return cr + 1;  // returns actual number of chars

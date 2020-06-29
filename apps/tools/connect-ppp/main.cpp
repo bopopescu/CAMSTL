@@ -433,6 +433,8 @@ static void load_ppp_module()
 
 int main(int argc, char* argv[])
 {
+	if (argc == 2)
+		g_RedStone.pppState(APS_UNCONNECTED);
 	if(argc >= 3)
 	{
 		g_arg.from_args(argc - 2, argv + 2);

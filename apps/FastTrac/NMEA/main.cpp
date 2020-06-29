@@ -141,10 +141,9 @@ static void* local_command_server( void* pClientData)
 
 static int g_LEDState = 0;
 
-
 static void set_LEDState(int p_state)
 {
-	static bool g_bSentInetNotification = false; //ISCP-327
+
 	if(p_state == g_LEDState)
 	{
 		return;
@@ -161,7 +160,6 @@ static void set_LEDState(int p_state)
 	case 2: 
 		send_redstone_ud_msg("i2c-gpio-monitor", 0, "blink kick name=gps led=gps script=\"1,2900000;0,100000\" \r"); 
 		send_redstone_ud_msg("i2c-gpio-monitor", 0, "blink kick name=gpsr led=gps.r script=\"0,1000000\" \r"); 
-		g_bSentInetNotification = false; //ISCP-257
 		break;
 	case 3: 
 		send_redstone_ud_msg("i2c-gpio-monitor", 0, "blink kick name=gps led=gps script=\"1,125000;0,125000\" \r"); 
@@ -169,18 +167,8 @@ static void set_LEDState(int p_state)
 		break;
 	case 4: 
 		send_redstone_ud_msg("i2c-gpio-monitor", 0, "blink kick name=gps  led=gps   script=\"0,500000\"\r"); 
-		send_redstone_ud_msg("i2c-gpio-monitor", 0, "blink kick name=gpsr led=gps.r script=\"1,500000\"\r"); //ISCP-57/ISCP-329
-		if (g_bSentInetNotification == false)//ISCP-327
-	{
-		g_bSentInetNotification = true;
-			ats_logf(ATSLOG_DEBUG, "NMEA sending inet_error message\r");		
-		AFS_Timer t;
-		t.SetTime();
-		std::string user_data = "966," + t.GetTimestampWithOS() + ", TGX has lost GPS";
-		user_data = ats::to_hex(user_data);
-		send_redstone_ud_msg("message-assembler", 0, "msg inet_error msg_priority=9 usr_msg_data=%s\r", user_data.c_str());
-	}
-		break;
+		send_redstone_ud_msg("i2c-gpio-monitor", 0, "blink kick name=gpsr led=gps.r script=\"1,500000\"\r"); //ISCP-57/ISCP-329	break;
+                break;
 	case 5: 
 		send_redstone_ud_msg("i2c-gpio-monitor", 0, "blink kick name=gps led=gps script=\"0,1000000\" \r"); 
 		send_redstone_ud_msg("i2c-gpio-monitor", 0, "blink kick name=gpsr led=gps.r script=\"1,1000000\" \r"); 
@@ -385,8 +373,6 @@ static void position_event(enum POSITION_EVENT& p_pe, enum POSITION_EVENT pe)
 
 int main(int argc, char **argv)
 {
-	wait_for_app_ready("message-assembler");
-
 	bool& bDebugging = g_bDebugging;
 
 	ats::String user;
@@ -431,7 +417,6 @@ int main(int argc, char **argv)
 	g_log.open_testdata("NMEA");
 	ATSLogger::set_global_logger(&g_log);
 	ats_logf(ATSLOG_ERROR, "---------- NMEA startup ----------");
-	sleep(10);//ISCP-327
 
 	NMEA_DATA_SOURCE curSource = DS_ANY;	// we take anything to start with.
 	int LEDState = 0;
