@@ -170,7 +170,7 @@ $(document).ready(function(){
 		
 		// submit the data via ajax
 		$.ajax({
-			  url: 'http://'+window.location.hostname+'/inc/portforwarding_processor.php',
+			  url: 'https://'+window.location.hostname+'/inc/portforwarding_processor.php',
 			  type: 'POST',
 			  data: "op=delete&ruleNum="+ruleIndexToDelete+"&totalRules="+(ruleIndex+1)+ajaxString,
 			  dataType: "text",
@@ -189,17 +189,17 @@ $(document).ready(function(){
 				  
 				  if(resultString.success == "true")
 				  {
-					  window.location.href = 'http://'+window.location.hostname+'/network/portforwarding/index.php?success=true&codes=10,14';
+					  window.location.href = 'https://'+window.location.hostname+'/network/portforwarding/index.php?success=true&codes=10,14';
 				  }
 				  else if(resultString.success == 'false' || resultString.success == false || result == null)
 				  {
-					  window.location.href = 'http://'+window.location.hostname+'/network/portforwarding/index.php?success=false&codes=12';
+					  window.location.href = 'https://'+window.location.hostname+'/network/portforwarding/index.php?success=false&codes=12';
 				  }*/
 			  },
 			  error:function(jqXHR, textStatus, errorThrown)		// ajax request failed
 			  {
 				  alert(textStatus);
-				  window.location.href = 'http://'+window.location.hostname+'/network/portforwarding/index.php?success=false&codes=11';
+				  window.location.href = 'https://'+window.location.hostname+'/network/portforwarding/index.php?success=false&codes=11';
 			  },
 			  complete:function()
 			  {

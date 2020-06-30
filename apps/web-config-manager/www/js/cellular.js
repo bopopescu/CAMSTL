@@ -25,7 +25,7 @@ function updateRSSI()
 			  dataType: "text",
 			  async: true,
 			  cache: false,
-			  url: 'http://'+window.location.hostname+'/inc/cell_view.inc',
+			  url: 'https://'+window.location.hostname+'/inc/cell_view.inc',
 			  data: { op: 'RSSIupdate' },
 				  
 			  beforeSend:function(){},

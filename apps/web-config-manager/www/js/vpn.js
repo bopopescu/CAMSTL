@@ -15,7 +15,7 @@ $(document).ready(function()
 		$vpnConnect = $.ajax({
 			  type: 'GET',
 			  dataType: "xml",
-			  url: 'http://'+window.location.hostname+'/inc/ipsec_ajax_controls.php',
+			  url: 'https://'+window.location.hostname+'/inc/ipsec_ajax_controls.php',
 			  data: ajax_data,
 			  async: true,
 			  cache: false,
@@ -60,7 +60,7 @@ $(document).ready(function()
 		$vpnDisconnect = $.ajax({
 			  type: 'GET',
 			  dataType: "xml",
-			  url: 'http://'+window.location.hostname+'/inc/ipsec_ajax_controls.php',
+			  url: 'https://'+window.location.hostname+'/inc/ipsec_ajax_controls.php',
 			  data: ajax_data,
 			  async: true,
 			  cache: false,

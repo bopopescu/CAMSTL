@@ -19,7 +19,7 @@ function checkIpConflict(intf, rowId)
 	  dataType: "text",
 	  async: true,
 	  cache: false,
-	  url: 'http://'+window.location.hostname+'/inc/ajax.php',
+	  url: 'https://'+window.location.hostname+'/inc/ajax.php',
 	  data: { op: 'getip', data: intf },
 	  beforeSend:function(){
 		  //alert(intf);

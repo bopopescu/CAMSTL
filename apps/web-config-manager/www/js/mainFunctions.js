@@ -49,7 +49,7 @@ $(document).ready(function()
 	$(".page_refresh").click(function(e){
 		e.preventDefault();
 
-		window.location.replace('http://'+window.location.hostname + window.location.pathname);
+		window.location.replace('https://'+window.location.hostname + window.location.pathname);
 	});
 
 	$('div.expandIcon').hide();

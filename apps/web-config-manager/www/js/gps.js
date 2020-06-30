@@ -21,7 +21,7 @@ $(document).ready(function()
 				  dataType: "text",		//changed this from xml to text to avoid any issues parsing xml.
 				  async: true,
 				  cache: false,
-				  url: 'http://'+window.location.hostname+'/inc/gps_view.php',
+				  url: 'https://'+window.location.hostname+'/inc/gps_view.php',
 				  data: { op: 'gpsupdate' },
 				  beforeSend:function(){
 					  //$(".msgBox .gpsFailed").remove();

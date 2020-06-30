@@ -15,7 +15,7 @@ $("#reboot").click(function(e){
 
 		$.ajax({
 			  type: 'POST',
-			  url: 'http://'+window.location.hostname+'/inc/reboot.php',
+			  url: 'https://'+window.location.hostname+'/inc/reboot.php',
 			  timeout: 10000,
 			  data: { op: 'reboot' },
 			  beforeSend:function(){ },
@@ -50,7 +50,7 @@ $("#reboot").click(function(e){
 	{
 		$.ajax({
 			  type: 'POST',
-			  url: 'http://'+window.location.hostname+'/inc/reboot.php',
+			  url: 'https://'+window.location.hostname+'/inc/reboot.php',
 			  timeout: 10000,
 			  data: { op: 'reboot' },
 			  beforeSend:function(){ },

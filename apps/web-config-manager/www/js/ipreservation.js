@@ -153,7 +153,7 @@ $(document).ready(function(){
 		
 		// submit the data via ajax
 		$.ajax({
-			  url: 'http://'+window.location.hostname+'/inc/ipreservation_processor.php',
+			  url: 'https://'+window.location.hostname+'/inc/ipreservation_processor.php',
 			  type: 'POST',
 			  data: "op=delete&ruleNum="+ruleIndexToDelete+"&totalRules="+totalCount+ajaxString,
 			  dataType: "text",
@@ -170,7 +170,7 @@ $(document).ready(function(){
 			  error:function(jqXHR, textStatus, errorThrown)		// ajax request failed
 			  {
 				  alert(textStatus);
-				  window.location.href = 'http://'+window.location.hostname+'/network/ipreservation/index.php?success=false&codes=11';
+				  window.location.href = 'https://'+window.location.hostname+'/network/ipreservation/index.php?success=false&codes=11';
 			  },
 			  complete:function()
 			  {

@@ -102,7 +102,7 @@ function addTemplate(templateId)
 	var dataStr = templateId + "&assignments="+assignments;
 	// submit the data via ajax
 	$.ajax({
-			url: 'http://'+window.location.hostname+'/inc/modbus_controller.php',
+			url: 'https://'+window.location.hostname+'/inc/modbus_controller.php',
 			type: 'POST',
 			data: "op=addTemplate&templateId="+dataStr,
 			dataType: "text",
@@ -118,7 +118,7 @@ function addTemplate(templateId)
 			error:function(jqXHR, textStatus, errorThrown)		// ajax request failed
 			{
 				alert(textStatus);
-				window.location.href = 'http://'+window.location.hostname+'/device/modbus/index.php?success=false&codes='+g_codes['failedtoSaveSettings'];
+				window.location.href = 'https://'+window.location.hostname+'/device/modbus/index.php?success=false&codes='+g_codes['failedtoSaveSettings'];
 			},
 			complete:function()
 			{
@@ -133,7 +133,7 @@ function deleteTemplate(templateId, assignments)
 	var dataStr = templateId + "&assignments="+assignments;
 	// submit the data via ajax
 	$.ajax({
-			url: 'http://'+window.location.hostname+'/inc/modbus_controller.php',
+			url: 'https://'+window.location.hostname+'/inc/modbus_controller.php',
 			type: 'POST',
 			data: "op=deleteTemplate&templateId="+dataStr,
 			dataType: "text",
@@ -147,7 +147,7 @@ function deleteTemplate(templateId, assignments)
 			error:function(jqXHR, textStatus, errorThrown)		// ajax request failed
 			{
 				alert(textStatus);
-				window.location.href = 'http://'+window.location.hostname+'/device/modbus/index.php?success=false&codes='+g_codes['failedtoSaveSettings'];
+				window.location.href = 'https://'+window.location.hostname+'/device/modbus/index.php?success=false&codes='+g_codes['failedtoSaveSettings'];
 			},
 			complete:function()
 			{
@@ -240,7 +240,7 @@ $(document).ready(function(){
 		var slave = $(this).closest("tr").attr("id");
 
 		$.ajax({
-			url: 'http://'+window.location.hostname+'/inc/modbus_controller.php',
+			url: 'https://'+window.location.hostname+'/inc/modbus_controller.php',
 			type: 'POST',
 			data: "op=deleteAssignment&slaveId="+slave,
 			dataType: "text",
@@ -256,7 +256,7 @@ $(document).ready(function(){
 				error:function(jqXHR, textStatus, errorThrown)		// ajax request failed
 				{
 					alert(textStatus);
-					window.location.href = 'http://'+window.location.hostname+'/device/modbus/index.php?success=false&codes='+g_codes['failedtoSaveSettings'];
+					window.location.href = 'https://'+window.location.hostname+'/device/modbus/index.php?success=false&codes='+g_codes['failedtoSaveSettings'];
 				},
 				complete:function()
 				{

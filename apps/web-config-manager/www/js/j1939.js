@@ -103,7 +103,7 @@ function addTemplate(templateId)
 	var dataStr = templateId + "&assignments="+assignments;
 	// submit the data via ajax
 	$.ajax({
-			url: 'http://'+window.location.hostname+'/inc/j1939_controller.php',
+			url: 'https://'+window.location.hostname+'/inc/j1939_controller.php',
 			type: 'POST',
 			data: "op=addTemplate&templateId="+dataStr,
 			dataType: "text",
@@ -119,7 +119,7 @@ function addTemplate(templateId)
 			error:function(jqXHR, textStatus, errorThrown)		// ajax request failed
 			{
 				alert(textStatus);
-				window.location.href = 'http://'+window.location.hostname+'/device/j1939/index.php?success=false&codes='+g_codes['failedtoSaveSettings'];
+				window.location.href = 'https://'+window.location.hostname+'/device/j1939/index.php?success=false&codes='+g_codes['failedtoSaveSettings'];
 			},
 			complete:function()
 			{
@@ -133,7 +133,7 @@ function deleteTemplate(templateId, active)
 	var dataStr = templateId + "&active="+active;
 	// submit the data via ajax
 	$.ajax({
-			url: 'http://'+window.location.hostname+'/inc/j1939_controller.php',
+			url: 'https://'+window.location.hostname+'/inc/j1939_controller.php',
 			type: 'POST',
 			data: "op=deleteTemplate&templateId="+dataStr,
 			dataType: "text",
@@ -147,7 +147,7 @@ function deleteTemplate(templateId, active)
 			error:function(jqXHR, textStatus, errorThrown)		// ajax request failed
 			{
 				alert(textStatus);
-				window.location.href = 'http://'+window.location.hostname+'/device/j1939/index.php?success=false&codes='+g_codes['failedtoSaveSettings'];
+				window.location.href = 'https://'+window.location.hostname+'/device/j1939/index.php?success=false&codes='+g_codes['failedtoSaveSettings'];
 			},
 			complete:function()
 			{

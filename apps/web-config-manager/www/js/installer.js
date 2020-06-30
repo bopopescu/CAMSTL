@@ -31,7 +31,7 @@ function updateRSSI()
 			  dataType: "text",
 			  async: true,
 			  cache: false,
-			  url: 'http://'+window.location.hostname+'/inc/installer_view.php',
+			  url: 'https://'+window.location.hostname+'/inc/installer_view.php',
 			  data: { op: 'RSSIupdate' },
 				  
 			  beforeSend:function(){},
