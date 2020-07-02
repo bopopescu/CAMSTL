@@ -148,8 +148,6 @@ void PacketizerCamsStateMachine::state_0()
 	m_IridiumEnable = db.GetBool("packetizer-cams", "IridiumEnable", "Off");
 	m_ForceIridium = db.GetValue("packetizer-cams", "ForceIridium", "Never");  // test iridium without checking cellular
 	m_FakeIridium = false; //db.GetBool("packetizer-cams", "FakeIridium", "Off");  // Send Iridium email directly via cell network
-	m_RemoveAfterDays = db.GetInt("packetizer-cams", "MaxDay", 14);
-	m_MaxDBRecords = db.GetInt("packetizer-cams", "MaxRecords", 20000);
 	
 	if(m_IridiumEnable)
 	{
@@ -170,8 +168,6 @@ void PacketizerCamsStateMachine::state_0()
 	m_keepAliveTimer.SetTime();
 	m_cell_sender->start();
 	m_dbreader->dbload_messagetypes(m_messagetypes);
-	m_dbreader->CleanupDB(m_RemoveAfterDays, m_MaxDBRecords);  // called explicitly here at startup because we want it to run.  Use local CleanupDB after this (will only clean up every hour)
-	
 	set_log_level(SM_ATSLOG_TRACE);
 	
 	SET_NEXT_STATE(1);
@@ -200,7 +196,6 @@ void PacketizerCamsStateMachine::state_1()
 		m_cell_sender->keepAlive();
 		m_keepAliveTimer.SetTime();
 	}
-	CleanupDB();  // check if it is time to trim the database - and do it if it is.
 	SET_NEXT_STATE(23);
 }
 
@@ -841,19 +836,6 @@ void PacketizerCamsStateMachine::	SendFakeIridium(std::vector<char> data)
   char ibuf[256];
   sprintf(ibuf, "/usr/bin/send-iridium.sh %s %s", m_IridiumIMEI.c_str(), strFname.c_str());
   system(ibuf); 
-}
-
-//---------------------------------------------------------------------------------------
-// CleanupDB - every 1/2 hour check for records > m_MaxDBRecords and for records older
-//             than m_RemoveAfterDays and delete them.
-//
-void PacketizerCamsStateMachine::CleanupDB()
-{
-	if (m_CheckDBSizeTimer.DiffTime() > 1800)  // check every 1/2 hour
-	{
-		m_dbreader->CleanupDB(m_RemoveAfterDays, m_MaxDBRecords);
-		m_CheckDBSizeTimer.SetTime();  // resets the timer to 0
-	}
 }
 
 
