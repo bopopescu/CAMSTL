@@ -28,8 +28,7 @@
 						</div>
 
 						<div class="loginbox-bot">
-							<form method="post" id="login">
-
+				<form method="post" id="login" action="/login.php">
 								<div class="rowl">
 									<span class="loginbox-label">Username</span>
 								</div>
@@ -50,7 +49,8 @@
 									<span class="errorMsg" name="errorLoginPwd" style="display:none;"></span>
 									</span>
 								</div>
-								 <input type="hidden" name="ref" value="<?php echo (!empty($_REQUEST['ref']) ? $_REQUEST['ref']:''); ?>" />
+
+					<input type="hidden" name="ref" value="<?php echo (!empty($_REQUEST['ref']) ? htmlspecialchars($_REQUEST['ref'], ENT_QUOTES, 'UTF-8'):''); ?>" />
 								<div class="spacer">&nbsp;</div>
 								<div class="rowl">
 									<span class="formwl">

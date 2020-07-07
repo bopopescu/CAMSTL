@@ -164,7 +164,7 @@ function submitEthernet($nt_ctrl, $dhcp_ctrl, $dbconfig, $request)
 		if(!empty($request['ctlRouteOverride']))
 		{
 			$ethernet_result['routeOverride']  = $dbconfig->setDbconfigData('system', 'RouteOverride', $request['ctlRouteOverride']);
-			if ($request['ctlRouteOverride'] == 'secondary')
+			if ($request['ctlRouteOverride'] == 'secondary' && isOn($request['dhcpserver']))
 			{
 				$ethernet_result['routeIP']  = $dbconfig->setDbconfigData('system', 'RouteIP', $request['ctlRouteIP']);
 				$dbconfig->setDbconfigData('system', 'eth0dhcp', 'client');
@@ -172,7 +172,7 @@ function submitEthernet($nt_ctrl, $dhcp_ctrl, $dbconfig, $request)
 				$dbconfig->setDbconfigData('feature', 'secondary-monitor', '1');
 				$dbconfig->setDbconfigData('feature', 'primary-monitor', '0');
 			}
-			else if ($request['ctlRouteOverride'] == 'primary')
+			else if ($request['ctlRouteOverride'] == 'primary' && isOn($request['dhcpserver']))
 			{
 				$dbconfig->setDbconfigData('system', 'eth0dhcp', 'client');
 				$dbconfig->setDbconfigData('feature', 'packetizer-secondary', '0');

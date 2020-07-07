@@ -1,3 +1,4 @@
+<?php if(empty($_SESSION['M2M_SESH_USERNAME'])) { exit;}  ?>
 <!-- header content -->
 
 <?php require_once $_SERVER['DOCUMENT_ROOT'].'inc/display_controller.inc'; ?>

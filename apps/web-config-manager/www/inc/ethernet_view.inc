@@ -100,6 +100,8 @@ else
 
 	if (empty($edhcp_status_raw) || $edhcp_status_raw == "auto")
 	  $edhcp_status = "auto";
+	elseif ($edhcp_status_raw == "client")
+		$edhcp_status = "on";
 	else
 		$edhcp_status = ((!empty($edhcp_status_raw) && $edhcp_status_raw == "On") ? "on" : "off");
 }

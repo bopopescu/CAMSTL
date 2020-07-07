@@ -29,7 +29,7 @@ class dbconfigController {
 			$sh_args = 'dbget';
 		}
 
-		$sh_out = atsexec($sh_args);
+		$sh_out = atsexec(escapeshellcmd($sh_args));
 		debug('dbconfig_controller.inc|getDbconfig: ' . $sh_args . ' (admin client)', $sh_out);
 
 		if ((strcasecmp($sh_out, 'phpcmd: fail') != 0) && (strcasecmp($sh_out, 'phpcmd: invalid command') != 0)) {
@@ -123,7 +123,7 @@ class dbconfigController {
 	 */
 	function setDbconfig($app, $key, $value) {
 		$sh_args = 'dbset ' . bin2hex($app) . ' ' . bin2hex($key) . ' ' . bin2hex($value);
-		$sh_out = atsexec($sh_args);
+		$sh_out = atsexec(escapeshellcmd($sh_args));
 		//socket call
 		debug('dbconfig_controller.inc|setDbconfig: ' . $sh_args . ' (admin client)', $sh_out);
 
@@ -146,7 +146,7 @@ class dbconfigController {
 	 */
 	function setDbconfigDataFile($app, $key, $file) {
 		$sh_args = 'dbsetfile ' . bin2hex($app) . ' ' . bin2hex($key) . ' ' . bin2hex($file);
-		$sh_out = atsexec($sh_args);
+		$sh_out = atsexec(escapeshellcmd($sh_args));
 		//socket call
 		debug('dbconfig_controller.inc|setDbconfigDataFile: ' . $sh_args . ' (admin client)', $sh_out);
 

@@ -45,7 +45,7 @@ elseif(!empty($_REQUEST['user']) && !empty($_REQUEST['pass']))
 		session_write_close();		//Write session
 		setcookie('login', $_REQUEST['user']);
 		//redirect
-		if(!empty($_REQUEST['ref']) && !strpos($_REQUEST['ref'], "success"))
+			if(!empty($_REQUEST['ref']) && !strpos($_REQUEST['ref'], "success") && validateInternalPage($_REQUEST['ref']))
 		{
 			header("location:".$_REQUEST['ref']);	//to ref url passed in REQUEST
 		}
@@ -83,4 +83,28 @@ elseif(!empty($_REQUEST['user']) && !empty($_REQUEST['pass']))
 	$dt->close_sqlite($conn);	//close db connection
 }
 
+function validateInternalPage($ref) {
+	try {
+		if($url = parse_url($ref)){
+			if($url["host"] == $_SERVER['HTTP_HOST']){
+				$internalPages = array('/device/general/index.php',
+				'/device/settings/index.php', '/device/gps/index.php', '/device/modbus/index.php', '/network/wifi/index.php',
+				'/network/ethernet/index.php', '/network/cellular/index.php', '/support/changepassword/index.php', 
+				'/support/changepassword/firstlogin.php', '/login.php', '/reboot.php');
+				if(in_array($url["path"], $internalPages)){
+					return true;
+				} else {
+					return false;
+				}
+			} else {
+				return false;
+			}
+		} else {
+			return false;
+		}
+	}
+	catch(Exception $e) {
+	  return false;
+	}
+}
 ?>

@@ -1,3 +1,4 @@
+<?php if(empty($_SESSION['M2M_SESH_USERNAME'])) { exit;}  ?>
 	<!-- Sleep subsubtab -->
 	<form id="outputCheck" method="post" action="/inc/sleep_processor.php">
 		

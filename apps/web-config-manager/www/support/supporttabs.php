@@ -1,4 +1,4 @@
-
+<?php if(empty($_SESSION['M2M_SESH_USERNAME'])) { exit;}  ?>
 <div class="tabblock2">
 	<div class="tabs2">
 	

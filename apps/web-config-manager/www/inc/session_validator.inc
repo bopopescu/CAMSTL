@@ -126,6 +126,7 @@ include $_SERVER['DOCUMENT_ROOT'] . 'mainscriptsgroup.php';
 					{
 						if(($key != 'ref')&&($key != 'user')&&($key != 'pass'))
 						{
+							$value = (!empty($value) ? htmlspecialchars($value, ENT_QUOTES, 'UTF-8'):'');
 							echo "<input type='hidden' name='$key' value='$value' />";
 						}
 					}
