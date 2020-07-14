@@ -40,7 +40,7 @@
 		db-config set feature ssh-admin-tunnel 1
 		db-config set feature SER_GPS 1
 		# ISCP-268 		
-		db-config set -u feature gps-socket-server 1
+		db-config set -u feature gps-socket-server 0
 		db-config set feature NMEA 1
 		db-config set feature PositionUpdate 1
 		db-config set feature trip-monitor 1
