@@ -28,6 +28,7 @@
 	printf 'start_logging\r' | socat - unix-connect:/var/run/redstone/rtc-monitor
 	run-app 'Ignition Monitor' IgnitionMonitor&
 	run-app 'Check-For-Internet' /usr/bin/check-for-inet &
+
 	feature_configured=`db-config get -v feature-monitor configured`
 
 	# Setup default features (if no feature configuration has been performed).
@@ -69,8 +70,7 @@
 	db-config set -u feature telit-monitor 1
 	db-config set -u feature battery-monitor 1
 	db-config set -u feature NMEA 1
-	db-config set -u feature SER_GPS 1
-        db-config set -u feature gps-socket-server 1
+	db-config set -u feature SER_GPS 1    
 
 	db-config set feature packetizer-cams 1
 
@@ -101,6 +101,7 @@
 	/usr/bin/crit-battery-check &
 	
 	cp /var/log/messages /tmp/logdir &
+	/usr/bin/update-inet-time &
 	# added October 2019 to ensure CCID is correct after SIM change for iNet ModBus
 	/usr/bin/GetCCID &   
 exit 0
