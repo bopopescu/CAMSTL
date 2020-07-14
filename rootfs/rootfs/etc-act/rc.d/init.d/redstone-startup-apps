@@ -27,7 +27,7 @@
 
 	printf 'start_logging\r' | socat - unix-connect:/var/run/redstone/rtc-monitor
 	run-app 'Ignition Monitor' IgnitionMonitor&
-
+	run-app 'Check-For-Internet' /usr/bin/check-for-inet &
 	feature_configured=`db-config get -v feature-monitor configured`
 
 	# Setup default features (if no feature configuration has been performed).
