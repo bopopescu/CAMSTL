@@ -57,7 +57,7 @@ if [ '' = "$essid" ];then
 
 	if [ '' = "$essid" ];then # never been an SSID
 		essid=Aware$sn
-		password=AwareNow
+		password=ISC0$sn
 		ps=`wpa_passphrase $essid $password | sed -n "4p" | cut -d '=' -f 2`
 	
 		db-config set WiFi ssid "$essid"
@@ -73,7 +73,7 @@ fi
 #
 if [ 'RedStoneAP000' = "$essid" ] && [ '000' != "$sn" ];then
 	essid=Aware$sn
-	password=AwareNow
+	password=ISC0$sn
 	ps=`wpa_passphrase $essid $password | sed -n "4p" | cut -d '=' -f 2`
 	
 	db-config set WiFi ssid "$essid"
@@ -81,7 +81,7 @@ if [ 'RedStoneAP000' = "$essid" ] && [ '000' != "$sn" ];then
 fi
 if [ 'Aware000' = "$essid" ] && [ '000' != "$sn" ];then
 	essid=Aware$sn
-	password=AwareNow
+	password=ISC0$sn
 	ps=`wpa_passphrase $essid $password | sed -n "4p" | cut -d '=' -f 2`
 	
 	db-config set WiFi ssid "$essid"
@@ -104,7 +104,7 @@ if [ '' = "$ps" ];then
 	if [ 'NONE' != "$encryptype" ];then
 		ps=`db-config get WiFi password -v -n`
 		if [ '' = "$ps" ];then
-			 password=AwareNow
+			 password=ISC0$sn
 			 ps=`wpa_passphrase $essid $password | sed -n "4p" | cut -d '=' -f 2`
 			 db-config set WiFi password "$ps"
 		fi

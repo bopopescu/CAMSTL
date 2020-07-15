@@ -35,6 +35,8 @@ iptables -A FORWARD -i ra0 -o apcli0 -j ACCEPT
 iptables -A FORWARD -i apcli0 -o ra0 -j ACCEPT
 iptables -A FORWARD -i eth0 -o apcli0 -j ACCEPT
 iptables -A FORWARD -i apcli0 -o eth0 -j ACCEPT
+iptables -A INPUT -i eth0 -p tcp -m tcp --dport 443 -j ACCEPT
+iptables -A INPUT -i ra0 -p tcp -m tcp --dport 443 -j ACCEPT
 
 echo '1' > /proc/sys/net/ipv4/ip_forward
 exit 0
