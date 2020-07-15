@@ -91,8 +91,5 @@ if [ 0 = $? ];then
 	sys_monitor
 fi
 
-# for certification - turn on the Wifi since run-softap isn't running
-echo OLl > /dev/set-gpio
-
 unset D
 exit 0
