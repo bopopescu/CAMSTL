@@ -15,7 +15,7 @@
 		<div id="Priority1Section">
 			<div class="row">
 				<span class="label2">Shutdown Voltage</span>
-				<span class="formw2 reg">
+				<span class="formw2">
 					<input type="text" size="5" name="LowBatt" value="<?php echo $sleep_low_batt; ?>">&nbsp;V
 					<span class="errorMsg"></span> 
 					<br>

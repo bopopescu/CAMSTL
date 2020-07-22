@@ -141,11 +141,11 @@ if(!empty($_REQUEST))
   debug('=========_REQUEST=============', $_REQUEST);
 
   $result = updateSettings($dbconfig, trimRequest($_REQUEST));
-  header("location:http://".$_SERVER['HTTP_HOST']."/device/settings/index.php?success=".$result['success']."&module=".$result['module']."&codes=".implode(",",$result['codes'])."&fields=".$result['fields'].$result['getParams']);
+  header("location:https://".$_SERVER['HTTP_HOST']."/device/settings/index.php?success=".$result['success']."&module=".$result['module']."&codes=".implode(",",$result['codes'])."&fields=".$result['fields'].$result['getParams']);
 }
 else
 {
-  header("location:http://".$_SERVER['HTTP_HOST']."/device/settings/index.php");
+  header("location:https://".$_SERVER['HTTP_HOST']."/device/settings/index.php");
 }
 
 

@@ -23,32 +23,32 @@ if(!empty($_REQUEST))
 	{
 		case "updateSettings":
 			$result = updateSettings($dbconfig, trimRequest($_REQUEST));
-			header("location:http://".$_SERVER['HTTP_HOST']."/device/modbus/index.php?success=".$result['success']."&module=add".$result['module']."Template&codes=".implode(",",$result['codes'])."&fields=".$result['fields'].$result['getParams']);
+			header("location:https://".$_SERVER['HTTP_HOST']."/device/modbus/index.php?success=".$result['success']."&module=add".$result['module']."Template&codes=".implode(",",$result['codes'])."&fields=".$result['fields'].$result['getParams']);
 			break;
 		case "addTemplate";
 			$result = addTemplate($dbconfig, trimRequest($_REQUEST), $_FILES);
-			header("location:http://".$_SERVER['HTTP_HOST']."/device/modbus/index.php?success=".$result['success']."&module=add".$result['module']."Template&codes=".implode(",",$result['codes'])."&fields=".$result['fields'].$result['getParams']);
+			header("location:https://".$_SERVER['HTTP_HOST']."/device/modbus/index.php?success=".$result['success']."&module=add".$result['module']."Template&codes=".implode(",",$result['codes'])."&fields=".$result['fields'].$result['getParams']);
 			break;
 		case "deleteTemplate":
 			$result = deleteTemplate($dbconfig, trimRequest($_REQUEST));
-			echo "http://".$_SERVER['HTTP_HOST']."/device/modbus/index.php?success=".$result['success']."&module=".$result['module']."&codes=".implode(",",$result['codes'])."&fields=".$result['fields'].$result['getParams'];
+			echo "https://".$_SERVER['HTTP_HOST']."/device/modbus/index.php?success=".$result['success']."&module=".$result['module']."&codes=".implode(",",$result['codes'])."&fields=".$result['fields'].$result['getParams'];
 			break;
 		case "addAssignment":
 			$result = addAssignment($dbconfig, trimRequest($_REQUEST));
-			header("location:http://".$_SERVER['HTTP_HOST']."/device/modbus/index.php?success=".$result['success']."&module=".$result['module']."&codes=".implode(",",$result['codes'])."&fields=".$result['fields'].$result['getParams']);
+			header("location:https://".$_SERVER['HTTP_HOST']."/device/modbus/index.php?success=".$result['success']."&module=".$result['module']."&codes=".implode(",",$result['codes'])."&fields=".$result['fields'].$result['getParams']);
 			break;
 		case "deleteAssignment":
 			$result = deleteAssignment($dbconfig, trimRequest($_REQUEST));
-			echo "http://".$_SERVER['HTTP_HOST']."/device/modbus/index.php?success=".$result['success']."&module=".$result['module']."&codes=".implode(",",$result['codes'])."&fields=".$result['fields'].$result['getParams'];
+			echo "https://".$_SERVER['HTTP_HOST']."/device/modbus/index.php?success=".$result['success']."&module=".$result['module']."&codes=".implode(",",$result['codes'])."&fields=".$result['fields'].$result['getParams'];
 			break;
 		default:
-			header("location:http://".$_SERVER['HTTP_HOST']."/device/modbus/index.php?success=".$result['success']."&module=".$result['module']."&codes=".implode(",",$result['codes'])."&fields=".$result['fields'].$result['getParams']);
+			header("location:https://".$_SERVER['HTTP_HOST']."/device/modbus/index.php?success=".$result['success']."&module=".$result['module']."&codes=".implode(",",$result['codes'])."&fields=".$result['fields'].$result['getParams']);
 	}
 
 }
 else
 {
-	header("location:http://".$_SERVER['HTTP_HOST']."/device/modbus/index.php");
+	header("location:https://".$_SERVER['HTTP_HOST']."/device/modbus/index.php");
 }
 
 /**

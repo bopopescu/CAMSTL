@@ -34,7 +34,7 @@
 					<?php require_once $_SERVER['DOCUMENT_ROOT'].'inc/wifi_view.inc'; ?>
 
 					<!-- Header -->
-					<div class="inversetab">WiFI</div>
+					<div class="inversetab">WiFi</div>
 					<!---  <a href="/TL3000_HTML5/Default_CSH.htm#WIFI" TARGET="_blank"><img src="/images/help.png" alt="help" border="0" ></a> -->
 					<div class="hr"><hr /></div>
 					

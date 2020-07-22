@@ -19,12 +19,12 @@ if(!empty($_REQUEST) && $_REQUEST['network'] == 'cellular')
 
 	$result = submitCellular($cell_ctrl, $ipsec_ctrl, $dbconfig, trimRequest($_REQUEST));
 
-	header("location:http://".$_SERVER['HTTP_HOST']."/network/cellular/index.php?success=".$result['success']."&module=".$result['module']."&codes=".implode(",",$result['codes'])."&fields=".$result['fields'].$result['getParams']);
+	header("location:https://".$_SERVER['HTTP_HOST']."/network/cellular/index.php?success=".$result['success']."&module=".$result['module']."&codes=".implode(",",$result['codes'])."&fields=".$result['fields'].$result['getParams']);
 
 }
 else
 {
-	header("location:http://".$_SERVER['HTTP_HOST']."/network/cellular/index.php");
+	header("location:https://".$_SERVER['HTTP_HOST']."/network/cellular/index.php");
 }
 
 

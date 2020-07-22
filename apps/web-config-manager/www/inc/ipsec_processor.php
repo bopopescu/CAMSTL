@@ -18,25 +18,25 @@ if(!empty($_REQUEST) && $_REQUEST['vpn'] == 'ipsec')
 	//Vpn IPSec form submission
 	$result = submitIPSec($ipsec_ctrl, $_REQUEST);
 
-	header("location:http://".$_SERVER['HTTP_HOST']."/network/vpn/index.php?success=".$result['success']."&module=".$result['module']."&codes=".implode(",",$result['codes']));
+	header("location:https://".$_SERVER['HTTP_HOST']."/network/vpn/index.php?success=".$result['success']."&module=".$result['module']."&codes=".implode(",",$result['codes']));
 
 	/*
 	if($result === true)			//ipsec form successfully processed
 	{
-		header("location:http://".$_SERVER['HTTP_HOST']."/network/vpn/index.php?success=true");
+		header("location:https://".$_SERVER['HTTP_HOST']."/network/vpn/index.php?success=true");
 	}
 	else if($result === false)		//ipsec form processing failed
 	{
-		header("location:http://".$_SERVER['HTTP_HOST']."/network/vpn/index.php?success=false");
+		header("location:https://".$_SERVER['HTTP_HOST']."/network/vpn/index.php?success=false");
 	}
 	else
 	{
-		header("location:http://".$_SERVER['HTTP_HOST']."/network/vpn/index.php");
+		header("location:https://".$_SERVER['HTTP_HOST']."/network/vpn/index.php");
 	}*/
 }
 else
 {
-	header("location:http://".$_SERVER['HTTP_HOST']."/network/vpn/index.php");
+	header("location:https://".$_SERVER['HTTP_HOST']."/network/vpn/index.php");
 }
 
 

@@ -66,7 +66,7 @@ if(empty($_SESSION['M2M_SESH_USERID']) && empty($_SESSION['M2M_SESH_USERAL']))
 				$queryString = "?".urlencode($_SERVER['QUERY_STRING']);
 			}
 
-			header("location:http://".$_SERVER['HTTP_HOST']."/login.php?ref="."http://".$_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF'].$queryString);
+			header("location:https://".$_SERVER['HTTP_HOST']."/login.php?ref="."https://".$_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF'].$queryString);
 			exit;
 		}
 ?>

@@ -9,14 +9,14 @@ session_start();	//start session
 if(!empty($_SESSION['M2M_SESH_USERID']) && !empty($_SESSION['M2M_SESH_USERAL']))
 {
 	//redirect them to the url passed in the http referrer or to the index page
-	//header("location:http://".$_SERVER['HTTP_HOST']."/index.php"); //for PROD
+	//header("location:https://".$_SERVER['HTTP_HOST']."/index.php"); //for PROD
 	if(hasInstallerAccess())
 	{
-		header("location:http://".$_SERVER['HTTP_HOST']."/device/installersettings/index.php");
+		header("location:https://".$_SERVER['HTTP_HOST']."/device/installersettings/index.php");
 	}
 	else
 	{
-		header("location:http://".$_SERVER['HTTP_HOST']."/device/general/index.php");
+		header("location:https://".$_SERVER['HTTP_HOST']."/device/general/index.php");
 	}
 }
 
@@ -51,15 +51,15 @@ elseif(!empty($_REQUEST['user']) && !empty($_REQUEST['pass']))
 		}
 		else
 		{
-			//header("location:http://".$_SERVER['HTTP_HOST']."/index.php"); //for PROD
+			//header("location:https://".$_SERVER['HTTP_HOST']."/index.php"); //for PROD
 
 			if(hasInstallerAccess())
 			{
-				header("location:http://".$_SERVER['HTTP_HOST']."/device/installersettings/index.php");
+				header("location:https://".$_SERVER['HTTP_HOST']."/device/installersettings/index.php");
 			}
 			else
 			{
-				header("location:http://".$_SERVER['HTTP_HOST']."/device/general/index.php");
+				header("location:https://".$_SERVER['HTTP_HOST']."/device/general/index.php");
 			}
 		}
 	}
@@ -87,10 +87,7 @@ function validateInternalPage($ref) {
 	try {
 		if($url = parse_url($ref)){
 			if($url["host"] == $_SERVER['HTTP_HOST']){
-				$internalPages = array('/device/general/index.php',
-				'/device/settings/index.php', '/device/gps/index.php', '/device/modbus/index.php', '/network/wifi/index.php',
-				'/network/ethernet/index.php', '/network/cellular/index.php', '/support/changepassword/index.php', 
-				'/support/changepassword/firstlogin.php', '/login.php', '/reboot.php');
+				$internalPages = array("/device/general/index.php", "/device/gps/index.php", "/device/installersettings/index.php", "/device/j1939/index.php", "/device/modbus/index.php", "/device/settings/index.php", "/device/zigbee/index.php", "/diagnostics/index.php", "/index.php", "/network/cellular/index.php", "/network/ethernet/index.php", "/network/ipreservation/index.php", "/network/iridium/index.php", "/network/portforwarding/index.php", "/network/vpn/index.php", "/support/changepassword/index.php", "/support/knownissues/index.php", "/support/whatsnew/index.php", "/support/debug.php", "/network/wifi/index.php", "/login.php", "/reboot.php");
 				if(in_array($url["path"], $internalPages)){
 					return true;
 				} else {

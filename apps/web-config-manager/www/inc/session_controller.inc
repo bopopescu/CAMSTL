@@ -9,7 +9,7 @@ if(empty($_SESSION['M2M_SESH_USERID']) && empty($_SESSION['M2M_SESH_USERAL']))
 {
 	debug("(session_controller.inc) Session info does not exist for the user. Redirecting to login page...");
 	//redirect user to the login page
-	//header("location:http://".$_SERVER['HTTP_HOST']."/login.php?ref="."http://".$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']);
+	//header("location:https://".$_SERVER['HTTP_HOST']."/login.php?ref="."https://".$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']);
 
 	$queryString = "";
 
@@ -18,7 +18,7 @@ if(empty($_SESSION['M2M_SESH_USERID']) && empty($_SESSION['M2M_SESH_USERAL']))
 		$queryString = "?".urlencode($_SERVER['QUERY_STRING']);
 	}
 
-	header("location:http://".$_SERVER['HTTP_HOST']."/login.php?ref="."http://".$_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF'].$queryString);
+	header("location:https://".$_SERVER['HTTP_HOST']."/login.php?ref="."https://".$_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF'].$queryString);
 
 	exit;
 }

@@ -11,11 +11,11 @@ $DebugCtrl = new dbconfigController();
 if(!empty($_REQUEST))
 {
 	$result = submitDebug($DebugCtrl, $_REQUEST);
-	header("location:http://".$_SERVER['HTTP_HOST']."/support/debug.php?success=".$result['success']."&module=".$result['module']."&codes=".implode(",",$result['codes'])."&fields=".$result['fields']);
+	header("location:https://".$_SERVER['HTTP_HOST']."/support/debug.php?success=".$result['success']."&module=".$result['module']."&codes=".implode(",",$result['codes'])."&fields=".$result['fields']);
 }
 else
 {
-	header("location:http://".$_SERVER['HTTP_HOST']."/support/debug.php");
+	header("location:https://".$_SERVER['HTTP_HOST']."/support/debug.php");
 }
 
 function submitDebug($dbconfig, $request)

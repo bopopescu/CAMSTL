@@ -13,13 +13,13 @@ if(!empty($_SESSION['M2M_SESH_USERID']))
 	
 	debug("(logout_controller.inc) Killed Session info. Redirecting to login page...");
 	
-	header("location:http://".$_SERVER['HTTP_HOST']."/login.php");	//redirect to login page
+	header("location:https://".$_SERVER['HTTP_HOST']."/login.php");	//redirect to login page
 }
 //if Session info does not exist for the user == user is not logged in
 else
 {
 	debug("(logout_controller.inc) Session info does not exist for user. Redirecting to login page...");
-	header("location:http://".$_SERVER['HTTP_HOST']."/login.php");	//redirect to login page
+	header("location:https://".$_SERVER['HTTP_HOST']."/login.php");	//redirect to login page
 }
 
 ?>

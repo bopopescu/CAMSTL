@@ -12,7 +12,8 @@
 				<span><input type="checkbox" name="useLowBatt" value="low_batt"/>Critical Low Voltage</span>
 			<?php } ?>
 				<span>
-					<input type="text" size="2" name="wakeupLowBattV" value="<?php echo $wakeup_low_battery_voltage; ?>" />&nbsp; V
+					<input type="text" size="3" name="wakeupLowBattV" value="<?php echo $wakeup_low_battery_voltage; ?>" />&nbsp; V
+					<span class="errorMsg"></span>
 				</span>
 		</div>
 		<br/>

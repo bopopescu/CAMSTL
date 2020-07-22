@@ -25,7 +25,7 @@ if (!empty($_REQUEST)) {
             if ($_REQUEST['loginProfile'] == $_SESSION['M2M_SESH_USERID']) {
               $resetSessionCode = ',53';
             }
-            header("location:http://" . $_SERVER['HTTP_HOST'] . "/support/changepassword/index.php?success=true&module=password&codes=50" . $resetSessionCode);
+            header("location:https://" . $_SERVER['HTTP_HOST'] . "/support/changepassword/index.php?success=true&module=password&codes=50" . $resetSessionCode);
           } else {
             //failed to change password
             header("location:https://" . $_SERVER['HTTP_HOST'] . "/support/changepassword/index.php?success=false&module=password&codes=51");

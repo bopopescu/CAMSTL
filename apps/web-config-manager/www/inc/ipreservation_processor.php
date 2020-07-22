@@ -20,17 +20,17 @@ if(!empty($_REQUEST))
 			case "add":
 			case "edit":
 				$result = saveIPReservationRule($dbconfig, trimRequest($_REQUEST));
-				header("location:http://".$_SERVER['HTTP_HOST']."/network/ipreservation/index.php?success=".$result['success']."&module=".$result['module']."&codes=".implode(",",$result['codes'])."&fields=".$result['fields'].$result['getParams']);
+				header("location:https://".$_SERVER['HTTP_HOST']."/network/ipreservation/index.php?success=".$result['success']."&module=".$result['module']."&codes=".implode(",",$result['codes'])."&fields=".$result['fields'].$result['getParams']);
 				break;
 
 			case "delete":
 				$result = deleteIPReservationRule($dbconfig, trimRequest($_REQUEST));
-				echo "http://".$_SERVER['HTTP_HOST']."/network/ipreservation/index.php?success=".$result['success']."&module=".$result['module']."&codes=".implode(",",$result['codes'])."&fields=".$result['fields'].$result['getParams'];
+				echo "https://".$_SERVER['HTTP_HOST']."/network/ipreservation/index.php?success=".$result['success']."&module=".$result['module']."&codes=".implode(",",$result['codes'])."&fields=".$result['fields'].$result['getParams'];
 				break;
 
 			default:
 				$result = saveIPReservationRule($dbconfig, trimRequest($_REQUEST));
-				header("location:http://".$_SERVER['HTTP_HOST']."/network/ipreservation/index.php?success=".$result['success']."&module=".$result['module']."&codes=".implode(",",$result['codes'])."&fields=".$result['fields'].$result['getParams']);
+				header("location:https://".$_SERVER['HTTP_HOST']."/network/ipreservation/index.php?success=".$result['success']."&module=".$result['module']."&codes=".implode(",",$result['codes'])."&fields=".$result['fields'].$result['getParams']);
 				break;
 		}
 
@@ -38,12 +38,12 @@ if(!empty($_REQUEST))
 	else
 	{
 		$result = saveIPReservationRule($dbconfig, trimRequest($_REQUEST));
-		header("location:http://".$_SERVER['HTTP_HOST']."/network/ipreservation/index.php?success=".$result['success']."&module=".$result['module']."&codes=".implode(",",$result['codes'])."&fields=".$result['fields'].$result['getParams']);
+		header("location:https://".$_SERVER['HTTP_HOST']."/network/ipreservation/index.php?success=".$result['success']."&module=".$result['module']."&codes=".implode(",",$result['codes'])."&fields=".$result['fields'].$result['getParams']);
 	}
 }
 else
 {
-	header("location:http://".$_SERVER['HTTP_HOST']."/network/ipreservation/index.php");
+	header("location:https://".$_SERVER['HTTP_HOST']."/network/ipreservation/index.php");
 }
 
 
